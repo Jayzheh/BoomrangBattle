@@ -1,41 +1,68 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine;
 
-public class bananaPlayer : MonoBehaviour
+public class NewPlayer : MonoBehaviour
 {
     PlayerControls controls;
     Vector2 move;
     float rotate;
     public float speed = 5f;
     public Animator animator;
-    public float walkSpeedThreshold = 0.1f; // Adjust this threshold value as needed
-    public float runSpeedThreshold = 0.5f; // Adjust this threshold value as needed
+    public float walkSpeedThreshold = 0.1f;
+    public float runSpeedThreshold = 0.5f;
     public Camera cam;
     private Rigidbody rb;
-    public float turnSpeed = 100f; // Speed of turning
+    public float turnSpeed = 100f;
+    [SerializeField]
+    private LayerMask groundLayer;
+
+    private CapsuleCollider capsuleCollider;
 
     void Awake()
     {
         // Initialize PlayerControls
         controls = new PlayerControls();
 
+        // Add event listeners for input actions
+        controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
+        controls.Gameplay.Move.canceled += ctx => move = Vector2.zero;
+        controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<float>();
+        controls.Gameplay.Rotate.canceled += ctx => rotate = 0f;
+
+        // Add event listeners for BoomerangThrow and Slash actions
+        controls.Gameplay.BoomerangThrow.performed += ctx => TriggerBoomerangThrow();
+        controls.Gameplay.Slash.performed += ctx => TriggerSlash();
+
+        // Get the Rigidbody and Collider components of the character
+        rb = GetComponent<Rigidbody>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
+
+        // Ensure char is upright
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        // Optional: Adjust the mass if needed
+        rb.mass = 2f; // Adjust based on your requirements
+    }
+
+    void OnEnable()
+    {
+        // Initialize controls if they are not already initialized
+        if (controls == null)
+        {
+            controls = new PlayerControls();
+        }
+        // Enable PlayerControls
+        controls.Gameplay.Enable();
+    }
+
+    void OnDisable()
+    {
+        // Ensure controls are initialized before disabling
         if (controls != null)
         {
-            // Add event listeners for input actions
-            controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
-            controls.Gameplay.Move.canceled += ctx => move = Vector2.zero;
-            controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<float>();
-            controls.Gameplay.Rotate.canceled += ctx => rotate = 0f;
+            // Disable PlayerControls
+            controls.Gameplay.Disable();
         }
-        else
-        {
-            Debug.LogError("Failed to initialize controls!");
-        }
-
-        // Get the Rigidbody component of the character
-        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -58,12 +85,31 @@ public class bananaPlayer : MonoBehaviour
         animator.SetFloat("Horizontal", horizontal);
         animator.SetFloat("Vertical", vertical);
 
-        // Debug statements
-        Debug.Log("Move Speed: " + moveSpeed);
-        Debug.Log("Is Moving: " + (moveSpeed > 0));
-        Debug.Log("Is Running: " + (moveSpeed > runSpeedThreshold));
-        Debug.Log("Horizontal: " + horizontal);
-        Debug.Log("Vertical: " + vertical);
+        // Ground Check
+        if (IsGrounded())
+        {
+            // Grounded, do nothing
+        }
+        else
+        {
+            // Apply a small force or velocity opposite to gravity to prevent falling further
+            rb.AddForce(Vector3.up * 0.1f, ForceMode.Impulse);
+        }
+    }
+
+    bool IsGrounded()
+    {
+        // Get the position for the raycast origin, slightly above the bottom of the collider
+        Vector3 origin = transform.position + Vector3.up * (capsuleCollider.height / 2 - capsuleCollider.center.y);
+
+        // Raycast downward to check if the character is grounded
+        float raycastDistance = 0.2f + capsuleCollider.height / 2; // Adjust the distance as needed
+        bool grounded = Physics.Raycast(origin, Vector3.down, out RaycastHit hit, raycastDistance, groundLayer);
+
+        // Debug the raycast to visualize it in the scene view
+        Debug.DrawRay(origin, Vector3.down * raycastDistance, grounded ? Color.green : Color.red);
+
+        return grounded;
     }
 
     void FixedUpdate()
@@ -86,15 +132,15 @@ public class bananaPlayer : MonoBehaviour
         }
     }
 
-    void OnEnable()
+    void TriggerBoomerangThrow()
     {
-        // Enable PlayerControls
-        controls.Gameplay.Enable();
+        // Trigger BoomerangThrow animation here
+        animator.SetTrigger("BoomerangThrow");
     }
 
-    void OnDisable()
+    void TriggerSlash()
     {
-        // Disable PlayerControls
-        controls.Gameplay.Disable();
+        // Trigger Slash animation here
+        animator.SetTrigger("Slash");
     }
 }

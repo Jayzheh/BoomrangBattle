@@ -130,6 +130,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1805692648667424067, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1805692648667424067, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 685ea9d5b4eb944149eaee60ae27ac28, type: 2}
+    - target: {fileID: 1805692648667424067, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4946332955453072771, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
       propertyPath: m_Name
       value: Banana
@@ -185,7 +197,12 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4946332955453072771, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
   m_PrefabInstance: {fileID: 527621252}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1007649498
+--- !u!95 &1007649499 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 1805692648667424067, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
+  m_PrefabInstance: {fileID: 527621252}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1007649501
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -198,6 +215,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
+  animator: {fileID: 1007649499}
+  walkSpeedThreshold: 0.1
+  runSpeedThreshold: 0.5
+  cam: {fileID: 0}
 --- !u!1 &1206193221
 GameObject:
   m_ObjectHideFlags: 0

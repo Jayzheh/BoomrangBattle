@@ -55,16 +55,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Script: {fileID: 11500000, guid: a308bc459428f4516a7b797fbabe2f2f, type: 3}
   m_Name: Global Volume Profile
   m_EditorClassIdentifier: 
-  components:
-  - {fileID: 7225331311088432630}
-  - {fileID: 2392206589416782144}
-  - {fileID: 7444957570398090810}
-  - {fileID: 5859739168768652775}
-  - {fileID: 962204566152670459}
-  - {fileID: -4983669264633382618}
+  speed: 3
 --- !u!114 &962204566152670459
 MonoBehaviour:
   m_ObjectHideFlags: 3

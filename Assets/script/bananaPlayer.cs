@@ -28,8 +28,6 @@ public class bananaPlayer : MonoBehaviour
             controls.Gameplay.Move.canceled += ctx => move = Vector2.zero;
             controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<float>();
             controls.Gameplay.Rotate.canceled += ctx => rotate = 0f;
-            controls.Gameplay.BoomerangThrow.performed += _ => animator.SetTrigger("BoomerangThrow");
-            controls.Gameplay.Slash.performed += _ => animator.SetTrigger("Slash");
         }
         else
         {

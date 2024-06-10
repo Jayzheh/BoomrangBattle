@@ -20,6 +20,9 @@ public class NewPlayer : MonoBehaviour
 
     void Awake()
     {
+        // Print the initial position for debugging
+        Debug.Log("Initial position: " + transform.position);
+
         // Initialize PlayerControls
         controls = new PlayerControls();
 
@@ -41,7 +44,9 @@ public class NewPlayer : MonoBehaviour
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         // Optional: Adjust the mass if needed
-        rb.mass = 2f; // Adjust based on your requirements
+        rb.mass = 1f; // Adjust based on your requirements
+
+        rb.useGravity = false;
     }
 
     void OnEnable()

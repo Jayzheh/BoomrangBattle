@@ -1,7 +1,7 @@
-using UnityEngine.InputSystem;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class NewPlayer : MonoBehaviour
+public class BananaPlayer : MonoBehaviour
 {
     PlayerControls controls;
     Vector2 move;
@@ -17,24 +17,19 @@ public class NewPlayer : MonoBehaviour
     private LayerMask groundLayer;
 
     private CapsuleCollider capsuleCollider;
+    [SerializeField] private BoomWeap boomWeap; // Reference to the BoomWeap script
+    [SerializeField] private GameObject handPositionGameObject;
 
-    void Awake()
+    void Start()
     {
-        // Print the initial position for debugging
-        Debug.Log("Initial position: " + transform.position);
-
         // Initialize PlayerControls
         controls = new PlayerControls();
 
         // Add event listeners for input actions
-        controls.Gameplay.Move.performed += ctx => move = ctx.ReadValue<Vector2>();
-        controls.Gameplay.Move.canceled += ctx => move = Vector2.zero;
-        controls.Gameplay.Rotate.performed += ctx => rotate = ctx.ReadValue<float>();
-        controls.Gameplay.Rotate.canceled += ctx => rotate = 0f;
-
-        // Add event listeners for BoomerangThrow and Slash actions
-        controls.Gameplay.BoomerangThrow.performed += ctx => TriggerBoomerangThrow();
-        controls.Gameplay.Slash.performed += ctx => TriggerSlash();
+        controls.Gameplay.Move.performed += ctx => OnMove(ctx.ReadValue<Vector2>());
+        controls.Gameplay.Move.canceled += ctx => OnMove(Vector2.zero);
+        controls.Gameplay.Rotate.performed += ctx => OnRotate(ctx.ReadValue<float>());
+        controls.Gameplay.Rotate.canceled += ctx => OnRotate(0f);
 
         // Get the Rigidbody and Collider components of the character
         rb = GetComponent<Rigidbody>();
@@ -54,26 +49,41 @@ public class NewPlayer : MonoBehaviour
 
     void OnEnable()
     {
-        // Initialize controls if they are not already initialized
-        if (controls == null)
+        if (controls != null)
         {
-            controls = new PlayerControls();
+            controls.Gameplay.Enable();
         }
-        // Enable PlayerControls
-        controls.Gameplay.Enable();
     }
 
     void OnDisable()
     {
-        // Ensure controls are initialized before disabling
         if (controls != null)
         {
-            // Disable PlayerControls
             controls.Gameplay.Disable();
         }
     }
 
     void Update()
+    {
+        UpdatePlayer();
+    }
+
+    void FixedUpdate()
+    {
+        FixedUpdatePlayer();
+    }
+
+    void OnMove(Vector2 movement)
+    {
+        move = movement;
+    }
+
+    void OnRotate(float rotation)
+    {
+        rotate = rotation;
+    }
+
+    void UpdatePlayer()
     {
         // Calculate horizontal and vertical movement
         float horizontal = move.x;
@@ -120,7 +130,7 @@ public class NewPlayer : MonoBehaviour
         return grounded;
     }
 
-    void FixedUpdate()
+    void FixedUpdatePlayer()
     {
         // Calculate the movement direction based on the input
         Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
@@ -138,17 +148,5 @@ public class NewPlayer : MonoBehaviour
         {
             cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
         }
-    }
-
-    void TriggerBoomerangThrow()
-    {
-        // Trigger BoomerangThrow animation here
-        animator.SetTrigger("BoomerangThrow");
-    }
-
-    void TriggerSlash()
-    {
-        // Trigger Slash animation here
-        animator.SetTrigger("Slash");
     }
 }

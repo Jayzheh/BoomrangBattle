@@ -46,6 +46,9 @@ public class NewPlayer : MonoBehaviour
         // Optional: Adjust the mass if needed
         rb.mass = 1f; // Adjust based on your requirements
 
+        // Set the height of the capsule collider
+        capsuleCollider.height = 1.6f;
+
         rb.useGravity = false;
     }
 

@@ -38,6 +38,7 @@ public class BoomWeap : MonoBehaviour
         }
 
         controls.Gameplay.Enable();
+        Debug.Log("Controls enabled BoomWeap.cs");
     }
 
     void OnDisable()
@@ -46,6 +47,7 @@ public class BoomWeap : MonoBehaviour
         if (controls != null)
         {
             controls.Gameplay.Disable();
+            Debug.Log("Controls disabled BoomWeap.cs");
         }
     }
 
@@ -55,6 +57,7 @@ public class BoomWeap : MonoBehaviour
         if (!isBoomerangThrown)
         {
             StartCoroutine(ThrowBoomerang());
+            Debug.Log("Call the ThrowBoomerang method");
         }
     }
 

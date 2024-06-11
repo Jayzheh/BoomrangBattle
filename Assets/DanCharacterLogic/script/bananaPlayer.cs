@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BananaPlayer : MonoBehaviour
+public class bananaPlayer : MonoBehaviour
 {
     PlayerControls controls;
     Vector2 move;
@@ -34,7 +34,7 @@ public class BananaPlayer : MonoBehaviour
         controls.Gameplay.BoomerangThrow.performed += OnThrowBoomerang; // Hook up the throw action
         controls.Gameplay.Grow.performed += OnGrow; // Hook up the grow action
 
-        Debug.Log("BananaPlayer Awake method executed");
+        Debug.Log("BananaPlayer Awake method executed bananaPlayer.cs");
     }
 
     void Start()
@@ -43,7 +43,7 @@ public class BananaPlayer : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
 
-        // Ensure char is upright
+        // Ensure character is upright
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         // Optional: Adjust the mass if needed
@@ -52,7 +52,7 @@ public class BananaPlayer : MonoBehaviour
         // Set the height of the capsule collider
         capsuleCollider.height = 1.6f;
 
-        rb.useGravity = false;
+        rb.useGravity = true; // Enable gravity
 
         // Ensure boomWeap is assigned
         if (boomWeap == null)
@@ -72,7 +72,8 @@ public class BananaPlayer : MonoBehaviour
         }
 
         controls.Gameplay.Enable();
-        Debug.Log("Controls enabled");
+        Debug.Log("Controls enabled bananaPlayer.cs");
+        
     }
 
     void OnDisable()
@@ -81,7 +82,7 @@ public class BananaPlayer : MonoBehaviour
         if (controls != null)
         {
             controls.Gameplay.Disable();
-            Debug.Log("Controls disabled");
+            Debug.Log("Controls disabled bananaPlayer.cs");
         }
     }
 
@@ -98,7 +99,7 @@ public class BananaPlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogError("boomWeap is not assigned.");
+                Debug.LogError("boomWeap is not assigned. bananaPlayer.cs");
             }
         }
     }
@@ -127,13 +128,13 @@ public class BananaPlayer : MonoBehaviour
     void OnMove(Vector2 movement)
     {
         move = movement;
-        Debug.Log("Move Input: " + movement);
+        Debug.Log("(bananaPlayer.cs) Move Input: " + movement);
     }
 
     void OnRotate(float rotation)
     {
         rotate = rotation;
-        Debug.Log("Rotate Input: " + rotation);
+        Debug.Log("(bananaPlayer.cs) Rotate Input: " + rotation);
     }
 
     void UpdatePlayer()
@@ -155,17 +156,6 @@ public class BananaPlayer : MonoBehaviour
         // Set horizontal and vertical parameters
         animator.SetFloat("Horizontal", horizontal);
         animator.SetFloat("Vertical", vertical);
-
-        // Ground Check
-        if (IsGrounded())
-        {
-            // Grounded, do nothing
-        }
-        else
-        {
-            // Apply a small force or velocity opposite to gravity to prevent falling further
-            rb.AddForce(Vector3.up * 0.1f, ForceMode.Impulse);
-        }
     }
 
     bool IsGrounded()
@@ -179,31 +169,45 @@ public class BananaPlayer : MonoBehaviour
 
         // Debug the raycast to visualize it in the scene view
         Debug.DrawRay(origin, Vector3.down * raycastDistance, grounded ? Color.green : Color.red);
+        Debug.Log("IsGrounded: " + grounded + ", Hit Point: " + (grounded ? hit.point.ToString() : "N/A"));
 
         return grounded;
     }
 
     void FixedUpdatePlayer()
     {
-        // Only apply movement and rotation if the character is not throwing the boomerang
-        if (!boomWeap.isBoomerangThrown)
+        // Ensure the player is grounded
+        if (IsGrounded())
         {
-            // Calculate the movement direction based on the input
-            Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
+            Debug.Log("Player is grounded in FixedUpdatePlayer");
 
-            // Move the character
-            rb.MovePosition(rb.position + movement);
-
-            // Rotate the character
-            float turn = rotate * turnSpeed * Time.deltaTime;
-            Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
-            rb.MoveRotation(rb.rotation * turnRotation);
-
-            // Rotate the camera if needed
-            if (cam != null)
+            // Only apply movement and rotation if the character is not throwing the boomerang
+            if (!boomWeap.isBoomerangThrown)
             {
-                cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
+                // Calculate the movement direction based on the input
+                Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
+
+                // Move the character
+                rb.MovePosition(rb.position + movement);
+
+                // Rotate the character
+                float turn = rotate * turnSpeed * Time.deltaTime;
+                Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
+                rb.MoveRotation(rb.rotation * turnRotation);
+
+                // Rotate the camera if needed
+                if (cam != null)
+                {
+                    cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
+                }
             }
+        }
+        else
+        {
+            Debug.Log("Error Player is not grounded in FixedUpdatePlayer");
+
+            // If not grounded, apply a downward force to keep the player grounded
+            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
         }
     }
 }

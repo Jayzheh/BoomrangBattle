@@ -95,11 +95,13 @@ public class BananaPlayer : MonoBehaviour
     void OnMove(Vector2 movement)
     {
         move = movement;
+        Debug.Log("Move Input: " + movement);
     }
 
     void OnRotate(float rotation)
     {
         rotate = rotation;
+         Debug.Log("Rotate Input: " + rotation);
     }
 
     void UpdatePlayer()
@@ -148,8 +150,10 @@ public class BananaPlayer : MonoBehaviour
 
         return grounded;
     }
-
-    void FixedUpdatePlayer()
+void FixedUpdatePlayer()
+{
+    // Only apply movement and rotation if the character is not throwing the boomerang
+    if (!boomWeap.isBoomerangThrown)
     {
         // Calculate the movement direction based on the input
         Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
@@ -168,4 +172,7 @@ public class BananaPlayer : MonoBehaviour
             cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
         }
     }
+}
+
+
 }

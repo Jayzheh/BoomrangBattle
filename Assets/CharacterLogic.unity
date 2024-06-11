@@ -149,7 +149,7 @@ MonoBehaviour:
   animator: {fileID: 582165250}
   walkSpeedThreshold: 0.1
   runSpeedThreshold: 0.3
-  cam: {fileID: 0}
+  cam: {fileID: 1925411310}
   turnSpeed: 100
 --- !u!95 &582165250 stripped
 Animator:
@@ -378,6 +378,7 @@ GameObject:
   - component: {fileID: 825235493}
   - component: {fileID: 825235495}
   - component: {fileID: 825235494}
+  - component: {fileID: 825235496}
   m_Layer: 0
   m_Name: Boomerang
   m_TagString: Untagged
@@ -413,10 +414,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c5d23b89b8ff4657a1b6c6ad27aaddd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boomerangPrefab: {fileID: 0}
-  handPositionTransform: {fileID: 0}
+  boomerangPrefab: {fileID: 8891296660489355776, guid: 86cc6d91e2a7242e1bdf297acef673fe, type: 3}
+  handPositionTransform: {fileID: 2096220399}
   throwForce: 10
-  animator: {fileID: 0}
+  animator: {fileID: 582165250}
+  isBoomerangThrown: 0
 --- !u!54 &825235493
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -488,6 +490,27 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.4
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &825235496
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825235489}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 685ea9d5b4eb944149eaee60ae27ac28, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &849352364
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -814,6 +837,42 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 193.396, z: 0.554}
+--- !u!4 &2084967527 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7785655239687176447, guid: 26737a77de7cba047904887f3ad725c9, type: 3}
+  m_PrefabInstance: {fileID: 718804248}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2096220398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2096220399}
+  m_Layer: 0
+  m_Name: HandPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2096220399
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2096220398}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.026, y: 0, z: 0.002}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2084967527}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &4156762144817307082
 PrefabInstance:
   m_ObjectHideFlags: 0

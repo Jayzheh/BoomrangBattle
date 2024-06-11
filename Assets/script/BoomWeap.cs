@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class BoomWeap : MonoBehaviour
 {
@@ -14,17 +15,19 @@ public class BoomWeap : MonoBehaviour
 
     private PlayerControls controls; // Declare PlayerControls variable
 
-    //private bool isBoomerangThrown = false; // Flag to track if the boomerang is thrown
     public bool isBoomerangThrown = false;
 
-    void Start()
+    void Awake()
     {
         // Initialize PlayerControls
         controls = new PlayerControls();
 
         // Add event listener for the ThrowBoomerang action
-        controls.Gameplay.BoomerangThrow.performed += ctx => ThrowBoomerang();
+        controls.Gameplay.BoomerangThrow.performed += ctx => TriggerBoomerangThrow();
+    }
 
+    void Start()
+    {
         // Instantiate the boomerang at the start and set it to kinematic
         InstantiateBoomerang();
     }
@@ -69,12 +72,24 @@ public class BoomWeap : MonoBehaviour
         }
     }
 
-    public void ThrowBoomerang()
+    private void TriggerBoomerangThrow()
+    {
+        // Call the ThrowBoomerang method
+        StartCoroutine(ThrowBoomerang());
+    }
+
+    public IEnumerator ThrowBoomerang() // Changed from private to public
     {
         // Ensure there is an existing boomerang instance and it's not already thrown
         if (boomerangInstance != null && !isBoomerangThrown)
         {
             Debug.Log("Throwing boomerang");
+
+            // Set the "BoomerangThrow" trigger in the Animator
+            animator.SetTrigger("BoomerangThrow");
+
+            // Wait for a short period to sync with the animation
+            yield return new WaitForSeconds(0.1f); // Adjust the duration as needed
 
             // Set the "Throwing" parameter to true in the Animator
             animator.SetBool("Throwing", true);
@@ -97,7 +112,19 @@ public class BoomWeap : MonoBehaviour
 
             // Set the flag to true to prevent further throwing until a new boomerang is instantiated
             isBoomerangThrown = true;
+
+            // Reset the "Throwing" parameter to false after a short delay
+            StartCoroutine(ResetThrowingParameter());
         }
+    }
+
+    private IEnumerator ResetThrowingParameter()
+    {
+        // Wait for a short period before resetting the "Throwing" parameter
+        yield return new WaitForSeconds(0.5f); // Adjust the duration as needed
+
+        // Reset the "Throwing" parameter to false in the Animator
+        animator.SetBool("Throwing", false);
     }
 
     void Update()
@@ -105,6 +132,12 @@ public class BoomWeap : MonoBehaviour
         // Ensure the boomerang stays in the hand position until it is thrown
         if (boomerangInstance != null && !isBoomerangThrown)
         {
+            Rigidbody rb = boomerangInstance.GetComponent<Rigidbody>();
+            if (rb != null && !rb.isKinematic)
+            {
+                rb.isKinematic = true;
+            }
+
             boomerangInstance.transform.position = handPositionTransform.position;
             boomerangInstance.transform.rotation = handPositionTransform.rotation;
         }

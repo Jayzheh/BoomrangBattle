@@ -185,6 +185,61 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "Computer",
+                    "id": "42f14f05-14c0-45d8-a510-bba0fc8cfbab",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "269b1436-b2a3-445f-bdf8-2301dcb28149",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "3b82100d-dd1e-4b9c-9e25-03c410c9865b",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "b2d3a773-5dfe-41a8-b4e1-8cac82696ff8",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "a5666424-48fa-4cb4-b47c-0019d83f4a7a",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "e41f6809-cce3-496f-a360-e9535ef5e477",
                     "path": "<DualSenseGamepadHID>/rightStick",
@@ -296,6 +351,17 @@
                 },
                 {
                     "name": "",
+                    "id": "2a8c607a-152a-4297-a318-caab96294290",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BoomerangThrow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "30b8469d-03cb-4897-84ac-69c00bfc611a",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
@@ -320,6 +386,17 @@
                     "name": "",
                     "id": "5655c4a6-ac8d-4a4b-854a-eae2fd3837f7",
                     "path": "<DualSenseGamepadHID>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Slash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a1ea368-3887-41bc-b6f2-3904a92b2744",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

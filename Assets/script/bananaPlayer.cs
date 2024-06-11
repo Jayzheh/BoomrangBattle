@@ -21,7 +21,7 @@ public class BananaPlayer : MonoBehaviour
     [SerializeField] private BoomWeap boomWeap; // Reference to the BoomWeap script
     [SerializeField] private GameObject handPositionGameObject;
 
-    void Start()
+    void Awake()
     {
         // Initialize PlayerControls
         controls = new PlayerControls();
@@ -31,8 +31,13 @@ public class BananaPlayer : MonoBehaviour
         controls.Gameplay.Move.canceled += ctx => OnMove(Vector2.zero);
         controls.Gameplay.Rotate.performed += ctx => OnRotate(ctx.ReadValue<float>());
         controls.Gameplay.Rotate.canceled += ctx => OnRotate(0f);
+        controls.Gameplay.BoomerangThrow.performed += OnThrowBoomerang; // Hook up the throw action
 
+        Debug.Log("BananaPlayer Awake method executed");
+    }
 
+    void Start()
+    {
         // Get the Rigidbody and Collider components of the character
         rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
@@ -48,20 +53,30 @@ public class BananaPlayer : MonoBehaviour
 
         rb.useGravity = false;
 
+        // Ensure boomWeap is assigned
+        if (boomWeap == null)
+        {
+            boomWeap = GetComponentInChildren<BoomWeap>();
+        }
+
         Debug.Log("BananaPlayer Start method executed");
     }
 
     void OnEnable()
     {
-        if (controls != null)
+        // Ensure controls object is not null before enabling
+        if (controls == null)
         {
-            controls.Gameplay.Enable();
-            Debug.Log("Controls enabled");
+            controls = new PlayerControls();
         }
+
+        controls.Gameplay.Enable();
+        Debug.Log("Controls enabled");
     }
 
     void OnDisable()
     {
+        // Ensure controls object is not null before disabling
         if (controls != null)
         {
             controls.Gameplay.Disable();
@@ -76,7 +91,14 @@ public class BananaPlayer : MonoBehaviour
         if (context.started)
         {
             // Call the ThrowBoomerang method of the BoomWeap component
-            boomWeap.ThrowBoomerang();
+            if (boomWeap != null)
+            {
+                boomWeap.ThrowBoomerang();
+            }
+            else
+            {
+                Debug.LogError("boomWeap is not assigned.");
+            }
         }
     }
 
@@ -84,8 +106,6 @@ public class BananaPlayer : MonoBehaviour
     {
         UpdatePlayer();
     }
-
-
 
     void FixedUpdate()
     {
@@ -101,7 +121,7 @@ public class BananaPlayer : MonoBehaviour
     void OnRotate(float rotation)
     {
         rotate = rotation;
-         Debug.Log("Rotate Input: " + rotation);
+        Debug.Log("Rotate Input: " + rotation);
     }
 
     void UpdatePlayer()
@@ -150,29 +170,28 @@ public class BananaPlayer : MonoBehaviour
 
         return grounded;
     }
-void FixedUpdatePlayer()
-{
-    // Only apply movement and rotation if the character is not throwing the boomerang
-    if (!boomWeap.isBoomerangThrown)
+
+    void FixedUpdatePlayer()
     {
-        // Calculate the movement direction based on the input
-        Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
-
-        // Move the character
-        rb.MovePosition(rb.position + movement);
-
-        // Rotate the character
-        float turn = rotate * turnSpeed * Time.deltaTime;
-        Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
-        rb.MoveRotation(rb.rotation * turnRotation);
-
-        // Rotate the camera if needed
-        if (cam != null)
+        // Only apply movement and rotation if the character is not throwing the boomerang
+        if (!boomWeap.isBoomerangThrown)
         {
-            cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
+            // Calculate the movement direction based on the input
+            Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
+
+            // Move the character
+            rb.MovePosition(rb.position + movement);
+
+            // Rotate the character
+            float turn = rotate * turnSpeed * Time.deltaTime;
+            Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
+            rb.MoveRotation(rb.rotation * turnRotation);
+
+            // Rotate the camera if needed
+            if (cam != null)
+            {
+                cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
+            }
         }
     }
-}
-
-
 }

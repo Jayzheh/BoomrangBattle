@@ -6,6 +6,7 @@ public class BananaPlayer : MonoBehaviour
     PlayerControls controls;
     Vector2 move;
     float rotate;
+    public GameObject boomer;
     public float speed = 5f;
     public Animator animator;
     public float walkSpeedThreshold = 0.1f;
@@ -31,6 +32,7 @@ public class BananaPlayer : MonoBehaviour
         controls.Gameplay.Rotate.performed += ctx => OnRotate(ctx.ReadValue<float>());
         controls.Gameplay.Rotate.canceled += ctx => OnRotate(0f);
 
+
         // Get the Rigidbody and Collider components of the character
         rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
@@ -45,6 +47,8 @@ public class BananaPlayer : MonoBehaviour
         capsuleCollider.height = 1.6f;
 
         rb.useGravity = false;
+
+        Debug.Log("BananaPlayer Start method executed");
     }
 
     void OnEnable()
@@ -52,6 +56,7 @@ public class BananaPlayer : MonoBehaviour
         if (controls != null)
         {
             controls.Gameplay.Enable();
+            Debug.Log("Controls enabled");
         }
     }
 
@@ -60,6 +65,18 @@ public class BananaPlayer : MonoBehaviour
         if (controls != null)
         {
             controls.Gameplay.Disable();
+            Debug.Log("Controls disabled");
+        }
+    }
+
+    // Method to handle the input action for throwing the boomerang
+    public void OnThrowBoomerang(InputAction.CallbackContext context)
+    {
+        // Check if the action is performed (button is pressed)
+        if (context.started)
+        {
+            // Call the ThrowBoomerang method of the BoomWeap component
+            boomWeap.ThrowBoomerang();
         }
     }
 
@@ -67,6 +84,8 @@ public class BananaPlayer : MonoBehaviour
     {
         UpdatePlayer();
     }
+
+
 
     void FixedUpdate()
     {

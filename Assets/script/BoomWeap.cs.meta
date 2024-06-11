@@ -3,7 +3,9 @@ guid: 6c5d23b89b8ff4657a1b6c6ad27aaddd
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - boomerangPrefab: {fileID: 8891296660489355776, guid: 86cc6d91e2a7242e1bdf297acef673fe, type: 3}
+  - handPositionTransform: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

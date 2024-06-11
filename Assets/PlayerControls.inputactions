@@ -65,6 +65,39 @@
                 },
                 {
                     "name": "",
+                    "id": "b5f2344f-83ad-4253-a6f4-f3b3d015b5f6",
+                    "path": "<DualShockGamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "38c0517b-f045-43d4-af87-1beedca628ed",
+                    "path": "<DualSenseGamepadHID>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "080936a9-8c5b-44b7-ad52-f30ef7aeafbe",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "5342bf7e-0a28-4171-b61e-25e9791dd4e7",
                     "path": "<DualSenseGamepadHID>/leftStick",
                     "interactions": "",

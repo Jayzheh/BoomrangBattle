@@ -6,7 +6,9 @@ public class BoomWeap : MonoBehaviour
 {
     public GameObject boomerangPrefab; // Assign in Unity Editor
     public Transform handPositionTransform; // Assign in Unity Editor
-    public float throwForce = 10f; // Adjust as needed
+    public float throwForce = 5f; // Adjust as needed
+    public float returnSpeed = 20f; // Increased for faster return
+    public float maxThrowDistance = 3f; // Shorter distance for testing
 
     public Animator animator; // Reference to the Animator component
 
@@ -16,6 +18,7 @@ public class BoomWeap : MonoBehaviour
     private PlayerControls controls; // Declare PlayerControls variable
 
     public bool isBoomerangThrown = false;
+    private Vector3 startPosition;
 
     void Awake()
     {
@@ -26,20 +29,15 @@ public class BoomWeap : MonoBehaviour
         controls.Gameplay.BoomerangThrow.performed += ctx => TriggerBoomerangThrow();
     }
 
-    void Start()
-    {
-        // Instantiate the boomerang at the start and set it to kinematic
-        InstantiateBoomerang();
-    }
-
     void OnEnable()
     {
         // Ensure controls object is not null before enabling
-        if (controls != null)
+        if (controls == null)
         {
-            // Enable the PlayerControls
-            controls.Gameplay.Enable();
+            controls = new PlayerControls();
         }
+
+        controls.Gameplay.Enable();
     }
 
     void OnDisable()
@@ -47,38 +45,20 @@ public class BoomWeap : MonoBehaviour
         // Ensure controls object is not null before disabling
         if (controls != null)
         {
-            // Disable the PlayerControls
             controls.Gameplay.Disable();
-        }
-    }
-
-    private void InstantiateBoomerang()
-    {
-        // Instantiate the boomerang if it doesn't already exist
-        if (boomerangInstance == null)
-        {
-            Debug.Log("Instantiating boomerang in hand");
-            boomerangInstance = Instantiate(boomerangPrefab, handPositionTransform.position, handPositionTransform.rotation);
-
-            // Get the Rigidbody component from the instantiated object
-            Rigidbody rb = boomerangInstance.GetComponent<Rigidbody>();
-
-            // Check if the instantiated object has a Rigidbody component
-            if (rb != null)
-            {
-                // Set isKinematic to true to prevent physics from affecting the boomerang
-                rb.isKinematic = true;
-            }
         }
     }
 
     private void TriggerBoomerangThrow()
     {
         // Call the ThrowBoomerang method
-        StartCoroutine(ThrowBoomerang());
+        if (!isBoomerangThrown)
+        {
+            StartCoroutine(ThrowBoomerang());
+        }
     }
 
-    public IEnumerator ThrowBoomerang() // Changed from private to public
+    public IEnumerator ThrowBoomerang()
     {
         // Ensure there is an existing boomerang instance and it's not already thrown
         if (boomerangInstance != null && !isBoomerangThrown)
@@ -89,7 +69,7 @@ public class BoomWeap : MonoBehaviour
             animator.SetTrigger("BoomerangThrow");
 
             // Wait for a short period to sync with the animation
-            yield return new WaitForSeconds(0.1f); // Adjust the duration as needed
+            yield return new WaitForSeconds(0.2f); // Adjust the duration as needed
 
             // Set the "Throwing" parameter to true in the Animator
             animator.SetBool("Throwing", true);
@@ -108,20 +88,66 @@ public class BoomWeap : MonoBehaviour
 
                 // Apply force to the boomerang
                 rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+
+                // Set the start position for the return calculation
+                startPosition = boomerangInstance.transform.position;
             }
+
+            // Detach the boomerang from the player's hand
+            boomerangInstance.transform.parent = null;
 
             // Set the flag to true to prevent further throwing until a new boomerang is instantiated
             isBoomerangThrown = true;
 
             // Reset the "Throwing" parameter to false after a short delay
             StartCoroutine(ResetThrowingParameter());
+
+            // Wait for the boomerang to reach its max distance and then return
+            yield return new WaitUntil(() => Vector3.Distance(startPosition, boomerangInstance.transform.position) >= maxThrowDistance);
+
+            StartCoroutine(ReturnBoomerang());
+        }
+    }
+
+    private IEnumerator ReturnBoomerang()
+    {
+        Debug.Log("Boomerang returning");
+
+        Rigidbody rb = boomerangInstance.GetComponent<Rigidbody>();
+
+        // Ensure the boomerang has a Rigidbody component
+        if (rb != null)
+        {
+            // Set the boomerang to kinematic for smooth return
+            rb.isKinematic = true;
+
+            // Calculate the return direction
+            Vector3 returnDirection = (handPositionTransform.position - boomerangInstance.transform.position).normalized;
+
+            while (Vector3.Distance(boomerangInstance.transform.position, handPositionTransform.position) > 0.1f)
+            {
+                // Move the boomerang towards the hand position
+                boomerangInstance.transform.position = Vector3.MoveTowards(boomerangInstance.transform.position, handPositionTransform.position, returnSpeed * Time.deltaTime);
+                yield return null;
+            }
+
+            // Reattach the boomerang to the hand
+            boomerangInstance.transform.position = handPositionTransform.position;
+            boomerangInstance.transform.rotation = handPositionTransform.rotation;
+            boomerangInstance.transform.parent = handPositionTransform;
+
+            // Debug message for when the boomerang returns
+            Debug.Log("Boomerang has returned to the player's hand.");
+
+            // Reset isBoomerangThrown to false
+            isBoomerangThrown = false;
         }
     }
 
     private IEnumerator ResetThrowingParameter()
     {
         // Wait for a short period before resetting the "Throwing" parameter
-        yield return new WaitForSeconds(0.5f); // Adjust the duration as needed
+        yield return new WaitForSeconds(2f); // Adjust the duration to match the animation length
 
         // Reset the "Throwing" parameter to false in the Animator
         animator.SetBool("Throwing", false);

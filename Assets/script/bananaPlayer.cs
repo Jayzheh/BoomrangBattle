@@ -32,6 +32,7 @@ public class BananaPlayer : MonoBehaviour
         controls.Gameplay.Rotate.performed += ctx => OnRotate(ctx.ReadValue<float>());
         controls.Gameplay.Rotate.canceled += ctx => OnRotate(0f);
         controls.Gameplay.BoomerangThrow.performed += OnThrowBoomerang; // Hook up the throw action
+        controls.Gameplay.Grow.performed += OnGrow; // Hook up the grow action
 
         Debug.Log("BananaPlayer Awake method executed");
     }
@@ -93,12 +94,23 @@ public class BananaPlayer : MonoBehaviour
             // Call the ThrowBoomerang method of the BoomWeap component
             if (boomWeap != null)
             {
-                boomWeap.ThrowBoomerang();
+                StartCoroutine(boomWeap.ThrowBoomerang());
             }
             else
             {
                 Debug.LogError("boomWeap is not assigned.");
             }
+        }
+    }
+
+    // Method to handle the input action for growing the player
+    public void OnGrow(InputAction.CallbackContext context)
+    {
+        // Check if the action is performed (button is pressed)
+        if (context.started)
+        {
+            // Increase the player's size
+            transform.localScale *= 1.5f;
         }
     }
 

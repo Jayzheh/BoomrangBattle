@@ -4,66 +4,91 @@ using UnityEngine.InputSystem;
 
 public class PlayerManager : MonoBehaviour
 {
-    // Define a list to keep track of connected players
     private List<PlayerInput> connectedPlayers = new List<PlayerInput>();
-
-    // Define the maximum number of players
     public int maxPlayers = 4;
-
-    // Define the player prefabs or game objects to instantiate
     public GameObject[] playerPrefabs;
-
-    // Array to store spawn points
     public Transform[] spawnPoints;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        // Subscribe to player join and leave events
-        PlayerInputManager.instance.onPlayerJoined += AssignPlayer;
-        PlayerInputManager.instance.onPlayerLeft += RemovePlayer;
+        // Verify that PlayerInputManager is initialized
+        if (PlayerInputManager.instance == null)
+        {
+            Debug.LogError("PlayerInputManager instance is null during Awake!");
+        }
     }
 
-    // Method to assign player to the next available slot
+    void Start()
+    {
+        if (PlayerInputManager.instance != null)
+        {
+            PlayerInputManager.instance.onPlayerJoined += AssignPlayer;
+            PlayerInputManager.instance.onPlayerLeft += RemovePlayer;
+        }
+        else
+        {
+            Debug.LogError("PlayerInputManager instance is null!");
+        }
+
+        if (spawnPoints == null || spawnPoints.Length == 0)
+        {
+            Debug.LogError("No spawn points assigned!");
+        }
+        if (playerPrefabs == null || playerPrefabs.Length == 0)
+        {
+            Debug.LogError("No player prefabs assigned!");
+        }
+    }
+
     void AssignPlayer(PlayerInput playerInput)
     {
         if (connectedPlayers.Count < maxPlayers)
         {
-            // Add the player to the list of connected players
             connectedPlayers.Add(playerInput);
-
-            // Determine the player index
             int playerIndex = connectedPlayers.IndexOf(playerInput);
 
-            // Instantiate the corresponding player prefab based on the player's index
-            GameObject playerPrefab = playerPrefabs[playerIndex];
+            if (playerIndex < playerPrefabs.Length)
+            {
+                GameObject playerPrefab = playerPrefabs[playerIndex];
+                Transform spawnPoint = GetRandomSpawnPoint();
 
-            // Get a random spawn point from the list
-            Transform spawnPoint = GetRandomSpawnPoint();
-
-            // Instantiate the player prefab at the spawn point position
-            Instantiate(playerPrefab, spawnPoint.position, Quaternion.identity);
+                if (spawnPoint != null)
+                {
+                    Instantiate(playerPrefab, spawnPoint.position, Quaternion.identity);
+                    Debug.Log($"Player {playerIndex + 1} spawned at {spawnPoint.position}");
+                }
+                else
+                {
+                    Debug.LogError("Spawn point is null!");
+                }
+            }
+            else
+            {
+                Debug.LogError("Not enough player prefabs assigned for the number of players!");
+            }
         }
         else
         {
             Debug.LogWarning("Maximum players reached!");
-            // Optionally handle the case when maximum players are reached
         }
     }
 
-    // Method to remove player from the list when they leave
     void RemovePlayer(PlayerInput playerInput)
     {
         connectedPlayers.Remove(playerInput);
     }
 
-    // Method to get a random spawn point from the list of spawn points
     Transform GetRandomSpawnPoint()
     {
-        // Choose a random index within the range of spawnPoints array
-        int randomIndex = Random.Range(0, spawnPoints.Length);
-
-        // Return the random spawn point
-        return spawnPoints[randomIndex];
+        if (spawnPoints != null && spawnPoints.Length > 0)
+        {
+            int randomIndex = Random.Range(0, spawnPoints.Length);
+            return spawnPoints[randomIndex];
+        }
+        else
+        {
+            Debug.LogError("No spawn points available!");
+            return null;
+        }
     }
 }

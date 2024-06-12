@@ -71,6 +71,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Dash"",
+                    ""type"": ""Button"",
+                    ""id"": ""011f3c85-3e36-4d50-a9e0-9de31a4d9c93"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -458,6 +467,50 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Slash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""67294477-9668-4c09-98ed-7dc8ab2d6f78"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c30dedb5-5df9-4a20-8fe3-d3719188cf8e"",
+                    ""path"": ""<DualShockGamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""10641205-1367-4282-873a-56acbfd81c06"",
+                    ""path"": ""<DualSenseGamepadHID>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5315a72f-0b8c-413f-9d83-e7aa20a93882"",
+                    ""path"": ""<DualSenseGamepadHID>/leftTriggerButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -471,6 +524,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Rotate = m_Gameplay.FindAction("Rotate", throwIfNotFound: true);
         m_Gameplay_BoomerangThrow = m_Gameplay.FindAction("BoomerangThrow", throwIfNotFound: true);
         m_Gameplay_Slash = m_Gameplay.FindAction("Slash", throwIfNotFound: true);
+        m_Gameplay_Dash = m_Gameplay.FindAction("Dash", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -537,6 +591,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Rotate;
     private readonly InputAction m_Gameplay_BoomerangThrow;
     private readonly InputAction m_Gameplay_Slash;
+    private readonly InputAction m_Gameplay_Dash;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -546,6 +601,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Rotate => m_Wrapper.m_Gameplay_Rotate;
         public InputAction @BoomerangThrow => m_Wrapper.m_Gameplay_BoomerangThrow;
         public InputAction @Slash => m_Wrapper.m_Gameplay_Slash;
+        public InputAction @Dash => m_Wrapper.m_Gameplay_Dash;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -570,6 +626,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Slash.started += instance.OnSlash;
             @Slash.performed += instance.OnSlash;
             @Slash.canceled += instance.OnSlash;
+            @Dash.started += instance.OnDash;
+            @Dash.performed += instance.OnDash;
+            @Dash.canceled += instance.OnDash;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -589,6 +648,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Slash.started -= instance.OnSlash;
             @Slash.performed -= instance.OnSlash;
             @Slash.canceled -= instance.OnSlash;
+            @Dash.started -= instance.OnDash;
+            @Dash.performed -= instance.OnDash;
+            @Dash.canceled -= instance.OnDash;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -613,5 +675,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnRotate(InputAction.CallbackContext context);
         void OnBoomerangThrow(InputAction.CallbackContext context);
         void OnSlash(InputAction.CallbackContext context);
+        void OnDash(InputAction.CallbackContext context);
     }
 }

@@ -75,7 +75,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""Dash"",
                     ""type"": ""Button"",
-                    ""id"": ""011f3c85-3e36-4d50-a9e0-9de31a4d9c93"",
+                    ""id"": ""a203c04e-8480-4e35-8290-67a8588f6f89"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -470,7 +470,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""67294477-9668-4c09-98ed-7dc8ab2d6f78"",
+                    ""id"": ""d13a69a2-9150-49a5-b3a8-d2ff079ca668"",
                     ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -481,7 +481,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""c30dedb5-5df9-4a20-8fe3-d3719188cf8e"",
+                    ""id"": ""56ea9321-3946-468c-89ae-0608b904be12"",
                     ""path"": ""<DualShockGamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -492,7 +492,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""10641205-1367-4282-873a-56acbfd81c06"",
+                    ""id"": ""8b715a2e-0000-4532-841f-2fa1b1302f45"",
                     ""path"": ""<DualSenseGamepadHID>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -503,7 +503,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""5315a72f-0b8c-413f-9d83-e7aa20a93882"",
+                    ""id"": ""b290aae2-c0cb-42bf-902d-9d3848abbbbd"",
                     ""path"": ""<DualSenseGamepadHID>/leftTriggerButton"",
                     ""interactions"": """",
                     ""processors"": """",

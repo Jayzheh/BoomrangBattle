@@ -1,213 +1,138 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class bananaPlayer : MonoBehaviour
 {
-    PlayerControls controls;
-    Vector2 move;
-    float rotate;
-    public GameObject boomer;
-    public float speed = 5f;
-    public Animator animator;
-    public float walkSpeedThreshold = 0.1f;
-    public float runSpeedThreshold = 0.5f;
-    public Camera cam;
+     PlayerControls controls;
+    Vector2 moveInput;
+    float growthFactor = 1.0f;
+    public float movementSpeed = 5f;
     private Rigidbody rb;
-    public float turnSpeed = 100f;
-    [SerializeField]
-    private LayerMask groundLayer;
+    private Animator animator;
+    private CapsuleCollider capsuleCollider; // Reference to the character's capsule collider
 
-    private CapsuleCollider capsuleCollider;
-    [SerializeField] private BoomWeap boomWeap; // Reference to the BoomWeap script
-    [SerializeField] private GameObject handPositionGameObject;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float growthDuration = 2f; // Duration for growth in seconds
+
+    Coroutine scaleCoroutine; // Coroutine reference for scaling back down
 
     void Awake()
     {
-        // Initialize PlayerControls
         controls = new PlayerControls();
-
-        // Add event listeners for input actions
-        controls.Gameplay.Move.performed += ctx => OnMove(ctx.ReadValue<Vector2>());
-        controls.Gameplay.Move.canceled += ctx => OnMove(Vector2.zero);
-        controls.Gameplay.Rotate.performed += ctx => OnRotate(ctx.ReadValue<float>());
-        controls.Gameplay.Rotate.canceled += ctx => OnRotate(0f);
-        controls.Gameplay.BoomerangThrow.performed += OnThrowBoomerang; // Hook up the throw action
-        controls.Gameplay.Grow.performed += OnGrow; // Hook up the grow action
-
-        Debug.Log("BananaPlayer Awake method executed bananaPlayer.cs");
+        controls.Gameplay.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.Gameplay.Move.canceled += _ => moveInput = Vector2.zero;
+        controls.Gameplay.Grow.performed += ctx =>
+        {
+            Grow();
+            ResetScaleCoroutine(); // Reset coroutine when player grows
+        };
+        controls.Gameplay.Slash.performed += ctx => Slash();
     }
 
     void Start()
     {
-        // Get the Rigidbody and Collider components of the character
         rb = GetComponent<Rigidbody>();
-        capsuleCollider = GetComponent<CapsuleCollider>();
-
-        // Ensure character is upright
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-
-        // Optional: Adjust the mass if needed
-        rb.mass = 1f; // Adjust based on your requirements
-
-        // Set the height of the capsule collider
-        capsuleCollider.height = 1.6f;
-
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         rb.useGravity = true; // Enable gravity
 
-        // Ensure boomWeap is assigned
-        if (boomWeap == null)
-        {
-            boomWeap = GetComponentInChildren<BoomWeap>();
-        }
+        animator = GetComponent<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider>(); // Get the capsule collider component
 
-        Debug.Log("BananaPlayer Start method executed");
+        // Adjust the initial position of the capsule collider to match the initial position of the character
+        capsuleCollider.center = new Vector3(0f, capsuleCollider.height / 2f, 0f);
     }
 
     void OnEnable()
     {
-        // Ensure controls object is not null before enabling
-        if (controls == null)
-        {
-            controls = new PlayerControls();
-        }
-
-        controls.Gameplay.Enable();
-        Debug.Log("Controls enabled bananaPlayer.cs");
-        
+        if (controls != null)
+            controls.Gameplay.Enable();
     }
 
     void OnDisable()
     {
-        // Ensure controls object is not null before disabling
         if (controls != null)
-        {
             controls.Gameplay.Disable();
-            Debug.Log("Controls disabled bananaPlayer.cs");
-        }
-    }
-
-    // Method to handle the input action for throwing the boomerang
-    public void OnThrowBoomerang(InputAction.CallbackContext context)
-    {
-        // Check if the action is performed (button is pressed)
-        if (context.started)
-        {
-            // Call the ThrowBoomerang method of the BoomWeap component
-            if (boomWeap != null)
-            {
-                StartCoroutine(boomWeap.ThrowBoomerang());
-            }
-            else
-            {
-                Debug.LogError("boomWeap is not assigned. bananaPlayer.cs");
-            }
-        }
-    }
-
-    // Method to handle the input action for growing the player
-    public void OnGrow(InputAction.CallbackContext context)
-    {
-        // Check if the action is performed (button is pressed)
-        if (context.started)
-        {
-            // Increase the player's size
-            transform.localScale *= 1.5f;
-        }
-    }
-
-    void Update()
-    {
-        UpdatePlayer();
     }
 
     void FixedUpdate()
     {
-        FixedUpdatePlayer();
+        Move();
+        ApplyGravity();
+        AdjustColliderHeight();
+        Debug.Log("Grounded: " + IsGrounded());
+        Debug.Log("Position: " + transform.position);
     }
 
-    void OnMove(Vector2 movement)
+    void Move()
     {
-        move = movement;
-        Debug.Log("(bananaPlayer.cs) Move Input: " + movement);
-    }
+        Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y) * movementSpeed * growthFactor * Time.fixedDeltaTime;
+        rb.MovePosition(rb.position + transform.TransformDirection(movement));
 
-    void OnRotate(float rotation)
-    {
-        rotate = rotation;
-        Debug.Log("(bananaPlayer.cs) Rotate Input: " + rotation);
-    }
-
-    void UpdatePlayer()
-    {
-        // Calculate horizontal and vertical movement
-        float horizontal = move.x;
-        float vertical = move.y;
-
-        // Calculate total movement speed
-        float moveSpeed = move.magnitude;
-
-        // Set animator parameters
+        // Update animator parameters
+        float moveSpeed = moveInput.magnitude;
         animator.SetFloat("Speed", moveSpeed);
         animator.SetBool("IsMoving", moveSpeed > 0);
+        animator.SetBool("IsRunning", moveSpeed > 0.5f);
+        animator.SetFloat("Horizontal", moveInput.x);
+        animator.SetFloat("Vertical", moveInput.y);
+    }
 
-        // Transition to running if moving faster than threshold
-        animator.SetBool("IsRunning", moveSpeed > runSpeedThreshold);
+    void Grow()
+    {
+        growthFactor *= 1.5f;
+        transform.localScale *= 1.5f;
+    }
 
-        // Set horizontal and vertical parameters
-        animator.SetFloat("Horizontal", horizontal);
-        animator.SetFloat("Vertical", vertical);
+    void Slash()
+    {
+        animator.SetTrigger("Slash");
+    }
+
+    void ApplyGravity()
+    {
+        if (!IsGrounded())
+        {
+            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
+        }
+        else
+        {
+            // If grounded, reset vertical velocity to prevent bouncing
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        }
     }
 
     bool IsGrounded()
     {
-        // Get the position for the raycast origin, slightly above the bottom of the collider
-        Vector3 origin = transform.position + Vector3.up * (capsuleCollider.height / 2 - capsuleCollider.center.y);
-
-        // Raycast downward to check if the character is grounded
-        float raycastDistance = 0.2f + capsuleCollider.height / 2; // Adjust the distance as needed
-        bool grounded = Physics.Raycast(origin, Vector3.down, out RaycastHit hit, raycastDistance, groundLayer);
-
-        // Debug the raycast to visualize it in the scene view
-        Debug.DrawRay(origin, Vector3.down * raycastDistance, grounded ? Color.green : Color.red);
-        Debug.Log("IsGrounded: " + grounded + ", Hit Point: " + (grounded ? hit.point.ToString() : "N/A"));
-
+        RaycastHit hit;
+        Vector3 raycastOrigin = transform.position + Vector3.up * 0.1f; // Slightly above the ground
+        bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, capsuleCollider.height / 2f, groundLayer);
         return grounded;
     }
 
-    void FixedUpdatePlayer()
+    void ResetScaleCoroutine()
     {
-        // Ensure the player is grounded
-        if (IsGrounded())
+        if (scaleCoroutine != null)
+            StopCoroutine(scaleCoroutine);
+        scaleCoroutine = StartCoroutine(ScaleDownAfterDelay());
+    }
+
+    IEnumerator ScaleDownAfterDelay()
+    {
+        yield return new WaitForSeconds(growthDuration);
+        while (growthFactor > 1.0f)
         {
-            Debug.Log("Player is grounded in FixedUpdatePlayer");
-
-            // Only apply movement and rotation if the character is not throwing the boomerang
-            if (!boomWeap.isBoomerangThrown)
-            {
-                // Calculate the movement direction based on the input
-                Vector3 movement = transform.forward * move.y * speed * Time.deltaTime;
-
-                // Move the character
-                rb.MovePosition(rb.position + movement);
-
-                // Rotate the character
-                float turn = rotate * turnSpeed * Time.deltaTime;
-                Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
-                rb.MoveRotation(rb.rotation * turnRotation);
-
-                // Rotate the camera if needed
-                if (cam != null)
-                {
-                    cam.transform.Rotate(new Vector3(0, rotate, 0) * turnSpeed * Time.deltaTime);
-                }
-            }
+            growthFactor -= Time.deltaTime / growthDuration; // Scale back down gradually
+            transform.localScale *= 1.0f - Time.deltaTime / growthDuration;
+            yield return null;
         }
-        else
-        {
-            Debug.Log("Error Player is not grounded in FixedUpdatePlayer");
+        growthFactor = 1.0f;
+        transform.localScale = Vector3.one; // Ensure scale is exactly 1.0f
+    }
 
-            // If not grounded, apply a downward force to keep the player grounded
-            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
-        }
+    void AdjustColliderHeight()
+    {
+        // Adjust the capsule collider height based on the growth factor
+        capsuleCollider.height = 2.02f * growthFactor; // Adjust this value according to your character's original collider height
     }
 }

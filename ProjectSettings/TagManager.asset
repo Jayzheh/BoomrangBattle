@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Weapon
+  - SpawnPoint1
+  - SpawnPoint2
+  - SpawnPoint3
+  - SpawnPoint4
   layers:
   - Default
   - TransparentFX

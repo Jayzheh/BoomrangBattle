@@ -7,6 +7,8 @@ public class bananaPlayer : MonoBehaviour
     PlayerControls controls;
     Vector2 moveInput;
     float growthFactor = 1.0f;
+    bool canGrow = true;
+    float growthCooldown = 0f;
     public float movementSpeed = 5f;
     public float dashSpeedBoost = 10f;
     public float dashDuration = 0.5f;
@@ -48,6 +50,10 @@ public class bananaPlayer : MonoBehaviour
 
         controls.Gameplay.BoomerangThrow.performed += ctx =>
         {
+            // Trigger the BoomerangThrow animation
+            animator.SetTrigger("BoomerangThrow");
+            animator.SetBool("Throwing", true);
+
             if (emitRaycastCoroutine != null)
             {
                 StopCoroutine(emitRaycastCoroutine);
@@ -56,6 +62,8 @@ public class bananaPlayer : MonoBehaviour
             Debug.Log("BoomerangThrow: Performing action");
             Debug.Log("New kill");
         };
+
+        animator = GetComponent<Animator>();
     }
 
     void Start()
@@ -111,11 +119,22 @@ public class bananaPlayer : MonoBehaviour
 
     void Grow()
     {
-        if (growthFactor < 1.5f)
+        if (canGrow && growthCooldown <= 0f)
         {
             growthFactor *= 1.1f;
             transform.localScale *= 1.1f;
             Debug.Log("Grow: Growth factor increased to " + growthFactor);
+
+            // Set cooldown before allowing growth again
+            canGrow = false;
+            growthCooldown = 3f; // Shortened cooldown time
+            Debug.Log("Grow: Cooldown started (" + growthCooldown + " seconds)");
+
+            ResetScaleCoroutine();
+        }
+        else
+        {
+            Debug.Log("Grow: Cannot grow yet. Cooldown remaining: " + growthCooldown.ToString("F1") + " seconds");
         }
     }
 
@@ -136,7 +155,7 @@ public class bananaPlayer : MonoBehaviour
 
     IEnumerator EmitRaycast()
     {
-        float duration = 5f;
+        float duration = 2f;
         float elapsedTime = 0f;
         Debug.Log("EmitRaycast: Started raycasting for 5 seconds");
 
@@ -203,14 +222,19 @@ public class bananaPlayer : MonoBehaviour
     IEnumerator ScaleDownAfterDelay()
     {
         yield return new WaitForSeconds(growthDuration);
+
         while (growthFactor > 1.0f)
         {
             growthFactor -= Time.deltaTime / growthDuration;
             transform.localScale *= 1.0f - Time.deltaTime / growthDuration;
             yield return null;
         }
+
         growthFactor = 1.0f;
         transform.localScale = Vector3.one;
+
+        // Reset growth ability
+        canGrow = true;
         Debug.Log("ScaleDownAfterDelay: Scaling down complete");
     }
 

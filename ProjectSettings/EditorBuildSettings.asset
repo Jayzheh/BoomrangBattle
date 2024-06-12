@@ -5,13 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Menu_scene_boomrang_battle.unity
     guid: 9400d19d7cb5f4f6088040586a0b7e3f
-  - enabled: 0
+  - enabled: 1
     path: Assets/PlayerManagerScene.unity
     guid: f0c8ed5146c7941a0a496d060b56e402
-  - enabled: 0
+  - enabled: 1
     path: Assets/map_added.unity
     guid: 1465c8013b19246999530118f97fc226
   m_configObjects:

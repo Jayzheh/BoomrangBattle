@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: 2b8e98b92292448ed81595752484935c
+=======
+guid: e501f1a8015414f6db178cfa1f030039
+>>>>>>> origin/boomerang
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

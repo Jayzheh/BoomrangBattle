@@ -80,6 +80,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Spawn"",
+                    ""type"": ""Button"",
+                    ""id"": ""d0a7e189-b7aa-4457-81b7-f8d502ce350b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -511,6 +520,50 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Dash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e66b9b28-7541-4f7c-abd2-35bf40064574"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Spawn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a8e6343c-a659-4e91-b211-6be689d085bc"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Spawn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""add13cf7-a58a-457d-98c8-77668329d4fa"",
+                    ""path"": ""<DualShockGamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Spawn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b86dac61-88da-4216-89b7-ee2f57e9eac3"",
+                    ""path"": ""<DualSenseGamepadHID>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Spawn"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -525,6 +578,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_BoomerangThrow = m_Gameplay.FindAction("BoomerangThrow", throwIfNotFound: true);
         m_Gameplay_Slash = m_Gameplay.FindAction("Slash", throwIfNotFound: true);
         m_Gameplay_Dash = m_Gameplay.FindAction("Dash", throwIfNotFound: true);
+        m_Gameplay_Spawn = m_Gameplay.FindAction("Spawn", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -592,6 +646,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_BoomerangThrow;
     private readonly InputAction m_Gameplay_Slash;
     private readonly InputAction m_Gameplay_Dash;
+    private readonly InputAction m_Gameplay_Spawn;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -602,6 +657,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @BoomerangThrow => m_Wrapper.m_Gameplay_BoomerangThrow;
         public InputAction @Slash => m_Wrapper.m_Gameplay_Slash;
         public InputAction @Dash => m_Wrapper.m_Gameplay_Dash;
+        public InputAction @Spawn => m_Wrapper.m_Gameplay_Spawn;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -629,6 +685,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Dash.started += instance.OnDash;
             @Dash.performed += instance.OnDash;
             @Dash.canceled += instance.OnDash;
+            @Spawn.started += instance.OnSpawn;
+            @Spawn.performed += instance.OnSpawn;
+            @Spawn.canceled += instance.OnSpawn;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -651,6 +710,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Dash.started -= instance.OnDash;
             @Dash.performed -= instance.OnDash;
             @Dash.canceled -= instance.OnDash;
+            @Spawn.started -= instance.OnSpawn;
+            @Spawn.performed -= instance.OnSpawn;
+            @Spawn.canceled -= instance.OnSpawn;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -676,5 +738,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnBoomerangThrow(InputAction.CallbackContext context);
         void OnSlash(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
+        void OnSpawn(InputAction.CallbackContext context);
     }
 }

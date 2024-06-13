@@ -63,7 +63,6 @@ public class bananaPlayer : MonoBehaviour
             }
             emitRaycastCoroutine = StartCoroutine(EmitRaycast());
             Debug.Log("BoomerangThrow: Performing action");
-            Debug.Log("New kill");
         };
 
         animator = GetComponent<Animator>();
@@ -75,7 +74,6 @@ public class bananaPlayer : MonoBehaviour
         rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
         rb.useGravity = true;
 
-        animator = GetComponent<Animator>();
         capsuleCollider = GetComponent<CapsuleCollider>();
 
         // Set up the LineRenderer
@@ -286,5 +284,11 @@ public class bananaPlayer : MonoBehaviour
 
         // Ensure the player's velocity is reset to prevent unwanted movement
         rb.velocity = Vector3.zero;
+    }
+
+    void Die()
+    {
+        Debug.Log("Die: Player died, notifying gameController");
+        gameController.instance.PlayerDied(gameObject);
     }
 }

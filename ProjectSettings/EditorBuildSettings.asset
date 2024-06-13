@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Menu_scene_boomrang_battle.unity
     guid: 9400d19d7cb5f4f6088040586a0b7e3f
   - enabled: 1
-    path: Assets/BackUpPlanRound2.unity
-    guid: 79e0dcc38ce8a4b3796926258e873bd5
+    path: Assets/PresBackUp.unity
+    guid: 135d0baa71aab4629b5a690698348c8b
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 7b0c5a7e2c2a54c57bd1f709323353be, type: 2}

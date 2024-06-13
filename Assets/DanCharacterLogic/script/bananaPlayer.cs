@@ -14,18 +14,28 @@ public class bananaPlayer : MonoBehaviour
     public float dashDuration = 0.5f;
     private float originalMovementSpeed;
     private Animator animator;
-    private Rigidbody rb; // Rigidbody component reference
+    private Rigidbody rb;
 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float growthDuration = 2f;
     [SerializeField] private float raycastDistance = 10f;
     [SerializeField] private Transform laserOrigin;
     [SerializeField] private ParticleSystem beamParticleSystem;
-    [SerializeField] private LayerMask enemyLayer; // Layer for the enemy
+    [SerializeField] private LayerMask enemyLayer;
 
     Coroutine scaleCoroutine;
     Coroutine emitRaycastCoroutine;
     Coroutine dashCoroutine;
+
+    // Parameters for animator
+    float speed;
+    bool IsMoving;
+    bool IsRunning;
+    float Horizontal;
+    float Vertical;
+    bool BoomerangThrow;
+    bool Slash;
+    bool Throwing;
 
     void Awake()
     {
@@ -40,34 +50,34 @@ public class bananaPlayer : MonoBehaviour
         };
         controls.Gameplay.Slash.performed += ctx =>
         {
-            Slash();
+            PerformSlash();
             Debug.Log("Slash: Performing action");
         };
 
         controls.Gameplay.Dash.performed += _ =>
         {
-            Dash();
+            PerformDash();
             Debug.Log("Dash: Performing action");
         };
 
         controls.Gameplay.BoomerangThrow.performed += ctx =>
         {
-            // Trigger the BoomerangThrow animation
-            animator.SetTrigger("BoomerangThrow");
-            animator.SetBool("Throwing", true);
-
-            if (emitRaycastCoroutine != null)
-            {
-                StopCoroutine(emitRaycastCoroutine);
-            }
-            emitRaycastCoroutine = StartCoroutine(EmitRaycast());
+            PerformBoomerangThrow();
             Debug.Log("BoomerangThrow: Performing action");
         };
 
         animator = GetComponent<Animator>();
-        rb = GetComponent<Rigidbody>(); // Get Rigidbody component from the same GameObject
-        rb.freezeRotation = true; // Freeze rotation to prevent unwanted physics behavior
-        rb.useGravity = false; // Disable gravity for now, as we handle it manually
+        rb = GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            rb.freezeRotation = true;
+            rb.useGravity = false;
+        }
+        else
+        {
+            Debug.LogError("Rigidbody component not found!");
+        }
     }
 
     void Start()
@@ -78,14 +88,27 @@ public class bananaPlayer : MonoBehaviour
 
     void OnEnable()
     {
+        if (controls == null)
+        {
+            controls = new PlayerControls();
+            // Reassign event callbacks here if needed
+        }
+
         controls.Gameplay.Enable();
         Debug.Log("OnEnable: Controls enabled");
     }
 
     void OnDisable()
     {
-        controls.Gameplay.Disable();
-        Debug.Log("OnDisable: Controls disabled");
+        if (controls != null)
+        {
+            controls.Gameplay.Disable();
+            Debug.Log("OnDisable: Controls disabled");
+        }
+        else
+        {
+            Debug.LogWarning("PlayerControls is null in OnDisable!");
+        }
     }
 
     void FixedUpdate()
@@ -99,14 +122,21 @@ public class bananaPlayer : MonoBehaviour
     void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y) * movementSpeed * growthFactor * Time.fixedDeltaTime;
-        rb.MovePosition(transform.position + transform.TransformDirection(movement)); // Use Rigidbody.MovePosition for physics-based movement
+        rb.MovePosition(transform.position + transform.TransformDirection(movement));
 
         float moveSpeed = moveInput.magnitude;
-        animator.SetFloat("Speed", moveSpeed);
-        animator.SetBool("IsMoving", moveSpeed > 0);
-        animator.SetBool("IsRunning", moveSpeed > 0.5f);
-        animator.SetFloat("Horizontal", moveInput.x);
-        animator.SetFloat("Vertical", moveInput.y);
+        speed = moveSpeed;
+        IsMoving = moveSpeed > 0;
+        IsRunning = moveSpeed > 0.5f;
+        Horizontal = moveInput.x;
+        Vertical = moveInput.y;
+
+        animator.SetFloat("Speed", speed);
+        animator.SetBool("IsMoving", IsMoving);
+        animator.SetBool("IsRunning", IsRunning);
+        animator.SetFloat("Horizontal", Horizontal);
+        animator.SetFloat("Vertical", Vertical);
+
         Debug.Log("Move: Moving with speed " + moveSpeed);
     }
 
@@ -118,9 +148,8 @@ public class bananaPlayer : MonoBehaviour
             transform.localScale *= 1.1f;
             Debug.Log("Grow: Growth factor increased to " + growthFactor);
 
-            // Set cooldown before allowing growth again
             canGrow = false;
-            growthCooldown = 3f; // Shortened cooldown time
+            growthCooldown = 3f;
             Debug.Log("Grow: Cooldown started (" + growthCooldown + " seconds)");
 
             ResetScaleCoroutine();
@@ -131,28 +160,80 @@ public class bananaPlayer : MonoBehaviour
         }
     }
 
-    void Slash()
+    void PerformSlash()
     {
-        animator.SetTrigger("Slash");
+        RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, 2f, enemyLayer);
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider.CompareTag("Enemy"))
+            {
+                Debug.Log("Slash: Enemy hit! It's a kill!");
+                Destroy(hit.collider.gameObject);
+            }
+        }
     }
 
-    void HandleInput(InputAction.CallbackContext ctx)
+    void PerformBoomerangThrow()
     {
+        if (animator != null)
+        {
+            animator.SetTrigger("BoomerangThrow");
+            animator.SetBool("Throwing", true);
+        }
+        else
+        {
+            Debug.LogWarning("BoomerangThrow: Animator is null!");
+        }
+
         if (emitRaycastCoroutine != null)
         {
             StopCoroutine(emitRaycastCoroutine);
         }
         emitRaycastCoroutine = StartCoroutine(EmitRaycast());
-        Debug.Log("HandleInput: Action coroutine started");
+    }
+
+    void PerformDash()
+    {
+        Dash();
+    }
+
+    public void Dash()
+    {
+        if (dashCoroutine != null)
+        {
+            StopCoroutine(dashCoroutine);
+        }
+        dashCoroutine = StartCoroutine(DashEffect());
+        Debug.Log("Dash: Dashing started");
+    }
+
+    IEnumerator DashEffect()
+    {
+        float elapsedTime = 0f;
+        float dashDistance = 2f;
+        Vector3 destination = transform.position + Vector3.forward * dashDistance;
+
+        while (elapsedTime < dashDuration)
+        {
+            float step = dashSpeedBoost * Time.deltaTime;
+            rb.MovePosition(Vector3.MoveTowards(transform.position, destination, step));
+            elapsedTime += Time.deltaTime;
+
+            if (Vector3.Distance(transform.position, destination) < 0.1f)
+                break;
+
+            yield return null;
+        }
+
+        rb.MovePosition(destination);
+        yield return new WaitForSeconds(0.1f);
+        Debug.Log("DashEffect: Dashing completed");
     }
 
     IEnumerator EmitRaycast()
     {
         float duration = 1f;
         float elapsedTime = 0f;
-        Debug.Log("EmitRaycast: Started raycasting for " + duration + " seconds");
-
-        // Play Particle System
         beamParticleSystem.Play();
 
         while (elapsedTime < duration)
@@ -161,21 +242,18 @@ public class bananaPlayer : MonoBehaviour
             Vector3 rayOrigin = laserOrigin.position;
             Vector3 rayDirection = laserOrigin.forward;
 
-            // Perform raycast
             if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance, enemyLayer))
             {
-                // Move Particle System to hit point
                 beamParticleSystem.transform.position = hit.point;
 
                 if (hit.collider.CompareTag("Enemy"))
                 {
                     Debug.Log("EmitRaycast: Enemy hit! It's a kill!");
-                    Destroy(hit.collider.gameObject); // Destroy the enemy
+                    Destroy(hit.collider.gameObject);
                 }
             }
             else
             {
-                // Move Particle System to max distance
                 beamParticleSystem.transform.position = rayOrigin + rayDirection * raycastDistance;
             }
 
@@ -183,7 +261,6 @@ public class bananaPlayer : MonoBehaviour
             yield return null;
         }
 
-        // Stop Particle System when raycasting ends
         beamParticleSystem.Stop();
         Debug.Log("EmitRaycast: Raycasting ended after " + duration + " seconds");
     }
@@ -192,7 +269,7 @@ public class bananaPlayer : MonoBehaviour
     {
         if (!IsGrounded())
         {
-            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration); // Use Rigidbody.AddForce for gravity
+            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
             Debug.Log("ApplyGravity: Applying gravity");
         }
     }
@@ -228,63 +305,30 @@ public class bananaPlayer : MonoBehaviour
         growthFactor = 1.0f;
         transform.localScale = Vector3.one;
 
-        // Reset growth ability
         canGrow = true;
         Debug.Log("ScaleDownAfterDelay: Scaling down complete");
-    }
-
-    public void Dash()
-    {
-        if (dashCoroutine != null)
-        {
-            StopCoroutine(dashCoroutine);
-        }
-        dashCoroutine = StartCoroutine(DashEffect());
-        Debug.Log("Dash: Dashing started");
-    }
-
-    IEnumerator DashEffect()
-    {
-        float elapsedTime = 0f;
-        float dashDistance = 2f; // Distance to dash
-
-        // Calculate the destination position
-        Vector3 destination = transform.position + transform.forward * dashDistance;
-
-        // Move the player to the destination position with physics
-        while (elapsedTime < dashDuration)
-        {
-            // Calculate the distance to move this frame: speed * deltaTime
-            float step = dashSpeedBoost * Time.deltaTime;
-
-            // Move towards the destination
-            rb.MovePosition(Vector3.MoveTowards(transform.position, destination, step));
-
-            // Increment the elapsed time
-            elapsedTime += Time.deltaTime;
-
-            // Check if we've reached the destination early
-            if (Vector3.Distance(transform.position, destination) < 0.1f)
-                break;
-
-            yield return null;
-        }
-
-        // Ensure the player's position is exactly at the destination
-        rb.MovePosition(destination);
-
-        // Wait for a short duration at the destination
-        yield return new WaitForSeconds(0.1f); // Adjust this duration as needed
-
-        // Reset any dash-related state or effects here
-        // For example, you might reset velocity or cooldowns
-
-        Debug.Log("DashEffect: Dashing completed");
     }
 
     public void Die()
     {
         Debug.Log("Die: Player died, notifying gameController");
+        // Assuming you have a game controller instance handling this
         gameController.instance.PlayerDied(gameObject);
+    }
+
+    void OnDestroy()
+    {
+        if (scaleCoroutine != null)
+            StopCoroutine(scaleCoroutine);
+        if (emitRaycastCoroutine != null)
+            StopCoroutine(emitRaycastCoroutine);
+        if (dashCoroutine != null)
+            StopCoroutine(dashCoroutine);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(laserOrigin.position, laserOrigin.forward * raycastDistance);
     }
 }

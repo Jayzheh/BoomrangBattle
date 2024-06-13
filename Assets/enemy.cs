@@ -13,19 +13,16 @@ public class enemy : MonoBehaviour
     private Animator animator;
     private Vector3 originalPosition;
     private Quaternion originalRotation;
-    public float laserAttackIntervalMin = 2f;
-    public float laserAttackIntervalMax = 5f;
 
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private Transform laserOrigin;
-    [SerializeField] private ParticleSystem beamParticleSystem;
     [SerializeField] private LayerMask playerLayer;
+    [SerializeField] private float minDistanceToOtherEnemies = 5f; // Increased minimum distance to maintain between enemies
+    [SerializeField] private float separationWeight = 5f; // Strength of the separation behavior
 
     private Rigidbody rb;
 
     void Awake()
     {
-        Debug.Log("Awake: Initializing enemy components");
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true; // Prevents the Rigidbody from rotating
@@ -36,16 +33,12 @@ public class enemy : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Start: Finding player and starting RandomLaserAttack coroutine");
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
-        beamParticleSystem.Stop(); // Ensure Particle System starts off
-        StartCoroutine(RandomLaserAttack());
     }
 
     void FixedUpdate()
     {
         float distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
-        Debug.Log("FixedUpdate: Distance to player: " + distanceToPlayer);
 
         if (distanceToPlayer <= detectionRange)
         {
@@ -64,31 +57,48 @@ public class enemy : MonoBehaviour
         }
 
         ApplyGravity();
-        Debug.Log("FixedUpdate: Grounded: " + IsGrounded());
+
+        // Check distance to other enemies and adjust position if necessary
+        AvoidOtherEnemies();
     }
 
     void AttackPlayer()
     {
         if (Time.time > attackCooldownTimer)
         {
-            animator.SetTrigger("Slash");
-            Debug.Log("AttackPlayer: Attacking the player");
+            int randomAttack = Random.Range(0, 3); // Randomly select an attack
 
-            // Perform the invisible ray beam attack
-            PerformRayBeamAttack();
+            switch (randomAttack)
+            {
+                case 0:
+                    Slash();
+                    break;
+                case 1:
+                    BoomerangThrow();
+                    break;
+                case 2:
+                    Dash();
+                    break;
+            }
 
             attackCooldownTimer = Time.time + attackCooldown;
         }
     }
 
-    void PerformRayBeamAttack()
+    void Slash()
     {
-        Ray ray = new Ray(laserOrigin.position, laserOrigin.forward);
-        RaycastHit hit;
+        animator.SetTrigger("Slash");
 
-        if (Physics.Raycast(ray, out hit, detectionRange, playerLayer))
+        // Perform invisible raycast
+        PerformInvisibleRaycast();
+    }
+
+    void PerformInvisibleRaycast()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, transform.forward, out hit, attackRange, playerLayer))
         {
-            Debug.Log("PerformRayBeamAttack: Player hit by invisible ray beam");
+            Debug.Log($"PerformInvisibleRaycast: Player hit by invisible raycast");
 
             // Check if the player has a component of type 'bananaPlayer'
             bananaPlayer player = hit.collider.GetComponent<bananaPlayer>();
@@ -98,6 +108,32 @@ public class enemy : MonoBehaviour
                 player.Die();
             }
         }
+    }
+
+    void BoomerangThrow()
+    {
+        animator.SetTrigger("BoomerangThrow");
+
+        // Perform raycast to check if player is hit by the boomerang throw
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, (playerTransform.position - transform.position).normalized, out hit, attackRange, playerLayer))
+        {
+            Debug.Log("BoomerangThrow: Player hit by boomerang throw");
+            bananaPlayer player = hit.collider.GetComponent<bananaPlayer>();
+            if (player != null)
+            {
+                player.Die();
+            }
+        }
+    }
+
+    void Dash()
+    {
+        animator.SetTrigger("Dash");
+
+        // Perform dash towards the player
+        Vector3 direction = (playerTransform.position - transform.position).normalized;
+        rb.AddForce(direction * 10f, ForceMode.Impulse);
     }
 
     void PursuePlayer()
@@ -113,7 +149,6 @@ public class enemy : MonoBehaviour
 
         animator.SetFloat("Speed", 1);
         animator.SetBool("IsMoving", true);
-        Debug.Log("PursuePlayer: Pursuing the player");
     }
 
     void Patrol()
@@ -136,7 +171,6 @@ public class enemy : MonoBehaviour
 
         animator.SetFloat("Speed", 0.5f);
         animator.SetBool("IsMoving", true);
-        Debug.Log("Patrol: Patrolling");
     }
 
     void ApplyGravity()
@@ -145,11 +179,6 @@ public class enemy : MonoBehaviour
         if (!IsGrounded())
         {
             rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration); // Use Rigidbody.AddForce for gravity
-            Debug.Log("ApplyGravity: Applying gravity");
-        }
-        else
-        {
-            Debug.Log("ApplyGravity: Grounded, resetting vertical position");
         }
     }
 
@@ -159,40 +188,7 @@ public class enemy : MonoBehaviour
         RaycastHit hit;
         Vector3 raycastOrigin = transform.position + Vector3.up * 0.1f;
         bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, 0.2f, groundLayer);
-        Debug.Log("IsGrounded: " + grounded);
         return grounded;
-    }
-
-    IEnumerator RandomLaserAttack()
-    {
-        // Continuously perform laser attacks randomly
-        while (true)
-        {
-            float waitTime = Random.Range(laserAttackIntervalMin, laserAttackIntervalMax);
-            Debug.Log("RandomLaserAttack: Waiting for " + waitTime + " seconds before next attack");
-            yield return new WaitForSeconds(waitTime);
-
-            if (Vector3.Distance(playerTransform.position, transform.position) <= detectionRange)
-            {
-                StartBeamEffect();
-                yield return new WaitForSeconds(1f); // Adjust beam duration if needed
-                StopBeamEffect();
-            }
-        }
-    }
-
-    void StartBeamEffect()
-    {
-        // Start the particle beam effect
-        beamParticleSystem.Play();
-        Debug.Log("StartBeamEffect: Started beam effect");
-    }
-
-    void StopBeamEffect()
-    {
-        // Stop the particle beam effect
-        beamParticleSystem.Stop();
-        Debug.Log("StopBeamEffect: Stopped beam effect");
     }
 
     void Die()
@@ -200,5 +196,29 @@ public class enemy : MonoBehaviour
         // Handle enemy death, notify game controller
         Debug.Log("Die: Enemy died, notifying gameController");
         gameController.instance.BotDied(gameObject);
+    }
+
+    void AvoidOtherEnemies()
+    {
+        // Find all enemy objects in the scene
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
+        {
+            if (enemy != gameObject) // Avoid checking against self
+            {
+                float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
+
+                if (distanceToEnemy < minDistanceToOtherEnemies)
+                {
+                    // Calculate the direction away from the other enemy
+                    Vector3 directionAway = (transform.position - enemy.transform.position).normalized;
+                    Vector3 separationForce = directionAway * separationWeight / distanceToEnemy;
+
+                    // Apply the separation force
+                    rb.AddForce(separationForce, ForceMode.Acceleration);
+                }
+            }
+        }
     }
 }

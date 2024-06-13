@@ -17,7 +17,7 @@ public class enemy : MonoBehaviour
     private Quaternion originalRotation;
     public float laserAttackIntervalMin = 2f;
     public float laserAttackIntervalMax = 5f;
-    
+
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float raycastDistance = 10f;
     [SerializeField] private Transform laserOrigin;
@@ -25,6 +25,7 @@ public class enemy : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("Awake: Initializing enemy components");
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         capsuleCollider = GetComponent<CapsuleCollider>();
@@ -43,6 +44,7 @@ public class enemy : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("Start: Finding player and starting RandomLaserAttack coroutine");
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         StartCoroutine(RandomLaserAttack());
     }
@@ -50,6 +52,7 @@ public class enemy : MonoBehaviour
     void FixedUpdate()
     {
         float distanceToPlayer = Vector3.Distance(playerTransform.position, transform.position);
+        Debug.Log("FixedUpdate: Distance to player: " + distanceToPlayer);
 
         if (distanceToPlayer <= detectionRange)
         {
@@ -103,7 +106,6 @@ public class enemy : MonoBehaviour
 
     void Patrol()
     {
-        // Simple patrol logic: move back to original position if far away
         if (Vector3.Distance(transform.position, originalPosition) > 0.1f)
         {
             Vector3 direction = (originalPosition - transform.position).normalized;
@@ -117,7 +119,6 @@ public class enemy : MonoBehaviour
         }
         else
         {
-            // Rotate to face original direction
             transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, Time.deltaTime * 2);
         }
 
@@ -159,7 +160,9 @@ public class enemy : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(laserAttackIntervalMin, laserAttackIntervalMax));
+            float waitTime = Random.Range(laserAttackIntervalMin, laserAttackIntervalMax);
+            Debug.Log("RandomLaserAttack: Waiting for " + waitTime + " seconds before next attack");
+            yield return new WaitForSeconds(waitTime);
 
             if (Vector3.Distance(playerTransform.position, transform.position) <= detectionRange)
             {
@@ -188,6 +191,7 @@ public class enemy : MonoBehaviour
             if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance))
             {
                 lineRenderer.SetPosition(1, hit.point);
+                Debug.Log("EmitRaycast: Ray hit " + hit.collider.name);
 
                 if (hit.collider.CompareTag("Player"))
                 {
@@ -199,6 +203,7 @@ public class enemy : MonoBehaviour
             {
                 // If raycast doesn't hit anything, draw line to max distance
                 lineRenderer.SetPosition(1, rayOrigin + rayDirection * raycastDistance);
+                Debug.Log("EmitRaycast: Ray did not hit anything");
             }
 
             elapsedTime += Time.deltaTime;
@@ -212,6 +217,7 @@ public class enemy : MonoBehaviour
 
     void Die()
     {
+        Debug.Log("Die: Enemy died, notifying gameController");
         gameController.instance.BotDied(gameObject);
     }
 }

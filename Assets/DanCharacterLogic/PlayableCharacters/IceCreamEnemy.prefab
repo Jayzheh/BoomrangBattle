@@ -671,7 +671,7 @@ Transform:
   m_Children:
   - {fileID: 4089948315865791606}
   m_Father: {fileID: 3733161407474563067}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3607772472939461196
 GameObject:
@@ -931,8 +931,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3733161407474563067}
   - {fileID: 2294161346976789299}
+  - {fileID: 3733161407474563067}
   - {fileID: 5772572184061468544}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -1424,12 +1424,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2253481023671431151}
   - {fileID: 521026897615525964}
   - {fileID: 3809021199549266156}
   - {fileID: 5622420752258143304}
-  - {fileID: 2253481023671431151}
   m_Father: {fileID: 3726230786339221746}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5728574887043566390
 GameObject:
@@ -1520,12 +1520,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6388363004244645725}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3726230786339221746}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &5600326171707240377
 SkinnedMeshRenderer:
@@ -2169,7 +2169,7 @@ Transform:
   m_Children:
   - {fileID: 2285035856138216024}
   m_Father: {fileID: 3733161407474563067}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7775023726999328485
 GameObject:
@@ -2232,7 +2232,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3733161407474563067}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7890299913303123762
 GameObject:
@@ -2296,7 +2296,7 @@ Transform:
   m_Children:
   - {fileID: 1024517490522144488}
   m_Father: {fileID: 3733161407474563067}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8626033527244668067
 GameObject:

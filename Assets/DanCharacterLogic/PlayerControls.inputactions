@@ -60,7 +60,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Spawn",
+                    "name": "SpawnEnemy",
                     "type": "Button",
                     "id": "d0a7e189-b7aa-4457-81b7-f8d502ce350b",
                     "expectedControlType": "Button",
@@ -506,7 +506,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Spawn",
+                    "action": "SpawnEnemy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -517,7 +517,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Spawn",
+                    "action": "SpawnEnemy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -528,7 +528,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Spawn",
+                    "action": "SpawnEnemy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -539,7 +539,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Spawn",
+                    "action": "SpawnEnemy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

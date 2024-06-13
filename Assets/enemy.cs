@@ -10,34 +10,26 @@ public class enemy : MonoBehaviour
     private float attackCooldownTimer;
     public float detectionRange = 10f;
     private Transform playerTransform;
-    private Rigidbody rb;
     private Animator animator;
-    private CapsuleCollider capsuleCollider;
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     public float laserAttackIntervalMin = 2f;
     public float laserAttackIntervalMax = 5f;
 
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float raycastDistance = 10f;
     [SerializeField] private Transform laserOrigin;
-    [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private ParticleSystem beamParticleSystem;
+    [SerializeField] private LayerMask playerLayer;
+
+    private Rigidbody rb;
 
     void Awake()
     {
         Debug.Log("Awake: Initializing enemy components");
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        capsuleCollider = GetComponent<CapsuleCollider>();
-
-        // Set up the LineRenderer
-        lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
-        lineRenderer.startColor = Color.red;
-        lineRenderer.endColor = Color.red;
-
+        rb.freezeRotation = true; // Prevents the Rigidbody from rotating
+        rb.useGravity = false; // We handle gravity manually
         originalPosition = transform.position;
         originalRotation = transform.rotation;
     }
@@ -46,6 +38,7 @@ public class enemy : MonoBehaviour
     {
         Debug.Log("Start: Finding player and starting RandomLaserAttack coroutine");
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        beamParticleSystem.Stop(); // Ensure Particle System starts off
         StartCoroutine(RandomLaserAttack());
     }
 
@@ -71,7 +64,6 @@ public class enemy : MonoBehaviour
         }
 
         ApplyGravity();
-        AdjustColliderHeight();
         Debug.Log("FixedUpdate: Grounded: " + IsGrounded());
     }
 
@@ -82,9 +74,28 @@ public class enemy : MonoBehaviour
             animator.SetTrigger("Slash");
             Debug.Log("AttackPlayer: Attacking the player");
 
-            // Implement your damage logic here
+            // Perform the invisible ray beam attack
+            PerformRayBeamAttack();
 
             attackCooldownTimer = Time.time + attackCooldown;
+        }
+    }
+
+    void PerformRayBeamAttack()
+    {
+        Ray ray = new Ray(laserOrigin.position, laserOrigin.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, detectionRange, playerLayer))
+        {
+            Debug.Log("PerformRayBeamAttack: Player hit by invisible ray beam");
+
+            // Assuming the player has a method "Die" to handle death
+            Player player = hit.collider.GetComponent<Player>();
+            if (player != null)
+            {
+                player.Die();
+            }
         }
     }
 
@@ -93,7 +104,7 @@ public class enemy : MonoBehaviour
         Vector3 direction = (playerTransform.position - transform.position).normalized;
         direction.y = 0; // Ensure the enemy does not tilt up or down
         Vector3 movement = direction * movementSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + movement);
+        rb.MovePosition(transform.position + movement); // Use Rigidbody for movement
 
         // Rotate to face the player
         Quaternion toRotation = Quaternion.LookRotation(direction);
@@ -111,7 +122,7 @@ public class enemy : MonoBehaviour
             Vector3 direction = (originalPosition - transform.position).normalized;
             direction.y = 0; // Ensure the enemy does not tilt up or down
             Vector3 movement = direction * movementSpeed * Time.fixedDeltaTime;
-            rb.MovePosition(rb.position + movement);
+            rb.MovePosition(transform.position + movement); // Use Rigidbody for movement
 
             // Rotate to face the original direction
             Quaternion toRotation = Quaternion.LookRotation(direction);
@@ -129,35 +140,31 @@ public class enemy : MonoBehaviour
 
     void ApplyGravity()
     {
+        // Simulate gravity if not grounded
         if (!IsGrounded())
         {
-            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
+            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration); // Use Rigidbody.AddForce for gravity
             Debug.Log("ApplyGravity: Applying gravity");
         }
         else
         {
-            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            Debug.Log("ApplyGravity: Grounded, resetting vertical velocity");
+            Debug.Log("ApplyGravity: Grounded, resetting vertical position");
         }
     }
 
     bool IsGrounded()
     {
+        // Check if the enemy is grounded using raycast
         RaycastHit hit;
         Vector3 raycastOrigin = transform.position + Vector3.up * 0.1f;
-        bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, capsuleCollider.height / 2f, groundLayer);
+        bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, 0.2f, groundLayer);
         Debug.Log("IsGrounded: " + grounded);
         return grounded;
     }
 
-    void AdjustColliderHeight()
-    {
-        capsuleCollider.height = 2.02f;
-        Debug.Log("AdjustColliderHeight: Adjusted height to " + capsuleCollider.height);
-    }
-
     IEnumerator RandomLaserAttack()
     {
+        // Continuously perform laser attacks randomly
         while (true)
         {
             float waitTime = Random.Range(laserAttackIntervalMin, laserAttackIntervalMax);
@@ -166,57 +173,30 @@ public class enemy : MonoBehaviour
 
             if (Vector3.Distance(playerTransform.position, transform.position) <= detectionRange)
             {
-                StartCoroutine(EmitRaycast());
+                StartBeamEffect();
+                yield return new WaitForSeconds(1f); // Adjust beam duration if needed
+                StopBeamEffect();
             }
         }
     }
 
-    IEnumerator EmitRaycast()
+    void StartBeamEffect()
     {
-        float duration = 1f;
-        float elapsedTime = 0f;
-        Debug.Log("EmitRaycast: Started raycasting for " + duration + " seconds");
+        // Start the particle beam effect
+        beamParticleSystem.Play();
+        Debug.Log("StartBeamEffect: Started beam effect");
+    }
 
-        // Enable LineRenderer
-        lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, laserOrigin.position);
-
-        while (elapsedTime < duration)
-        {
-            RaycastHit hit;
-            Vector3 rayOrigin = laserOrigin.position;
-            Vector3 rayDirection = laserOrigin.forward;
-
-            // Perform raycast
-            if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance))
-            {
-                lineRenderer.SetPosition(1, hit.point);
-                Debug.Log("EmitRaycast: Ray hit " + hit.collider.name);
-
-                if (hit.collider.CompareTag("Player"))
-                {
-                    Debug.Log("EmitRaycast: Player hit! It's a kill!");
-                    Destroy(hit.collider.gameObject); // Adjust this line as needed
-                }
-            }
-            else
-            {
-                // If raycast doesn't hit anything, draw line to max distance
-                lineRenderer.SetPosition(1, rayOrigin + rayDirection * raycastDistance);
-                Debug.Log("EmitRaycast: Ray did not hit anything");
-            }
-
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        // Disable LineRenderer when raycasting ends
-        lineRenderer.enabled = false;
-        Debug.Log("EmitRaycast: Raycasting ended after " + duration + " seconds");
+    void StopBeamEffect()
+    {
+        // Stop the particle beam effect
+        beamParticleSystem.Stop();
+        Debug.Log("StopBeamEffect: Stopped beam effect");
     }
 
     void Die()
     {
+        // Handle enemy death, notify game controller
         Debug.Log("Die: Enemy died, notifying gameController");
         gameController.instance.BotDied(gameObject);
     }

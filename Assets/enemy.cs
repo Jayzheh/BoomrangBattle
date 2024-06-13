@@ -90,10 +90,11 @@ public class enemy : MonoBehaviour
         {
             Debug.Log("PerformRayBeamAttack: Player hit by invisible ray beam");
 
-            // Assuming the player has a method "Die" to handle death
-            Player player = hit.collider.GetComponent<Player>();
+            // Check if the player has a component of type 'bananaPlayer'
+            bananaPlayer player = hit.collider.GetComponent<bananaPlayer>();
             if (player != null)
             {
+                // Call the Die method if accessible
                 player.Die();
             }
         }

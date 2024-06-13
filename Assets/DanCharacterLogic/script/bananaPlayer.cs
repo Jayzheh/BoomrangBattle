@@ -282,7 +282,7 @@ public class bananaPlayer : MonoBehaviour
         Debug.Log("DashEffect: Dashing completed");
     }
 
-    void Die()
+    public void Die()
     {
         Debug.Log("Die: Player died, notifying gameController");
         gameController.instance.PlayerDied(gameObject);

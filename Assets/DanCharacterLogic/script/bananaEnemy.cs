@@ -84,8 +84,13 @@ public class bananaEnemy : MonoBehaviour
     void PursuePlayer()
     {
         Vector3 direction = (playerTransform.position - transform.position).normalized;
+        direction.y = 0; // Ensure the enemy does not tilt up or down
         Vector3 movement = direction * movementSpeed * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + movement);
+
+        // Rotate to face the player
+        Quaternion toRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 5f);
 
         animator.SetFloat("Speed", 1);
         animator.SetBool("IsMoving", true);
@@ -94,14 +99,21 @@ public class bananaEnemy : MonoBehaviour
 
     void Patrol()
     {
-        // Simple patrol logic: move back to original position
-        Vector3 direction = (originalPosition - transform.position).normalized;
-        Vector3 movement = direction * movementSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + movement);
-
-        if (Vector3.Distance(transform.position, originalPosition) < 0.1f)
+        // Simple patrol logic: move back to original position if far away
+        if (Vector3.Distance(transform.position, originalPosition) > 0.1f)
         {
-            // Rotate to face original direction when reaching the original position
+            Vector3 direction = (originalPosition - transform.position).normalized;
+            direction.y = 0; // Ensure the enemy does not tilt up or down
+            Vector3 movement = direction * movementSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(rb.position + movement);
+
+            // Rotate to face the original direction
+            Quaternion toRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, Time.deltaTime * 5f);
+        }
+        else
+        {
+            // Rotate to face original direction
             transform.rotation = Quaternion.Slerp(transform.rotation, originalRotation, Time.deltaTime * 2);
         }
 

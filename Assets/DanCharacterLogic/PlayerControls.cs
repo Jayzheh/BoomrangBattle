@@ -89,6 +89,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Select"",
+                    ""type"": ""Button"",
+                    ""id"": ""7b1013c8-1a98-4925-a7b2-854dbcdc84dd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -564,6 +573,39 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""SpawnEnemy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ce143f64-cce9-44ce-b7aa-e14791fa6504"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0e4b73c2-8c70-4939-a4be-eb09384cae63"",
+                    ""path"": ""<DualShockGamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""de7caa35-4298-44c9-b5c5-3653f9215a06"",
+                    ""path"": ""<DualSenseGamepadHID>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -579,6 +621,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_Slash = m_Gameplay.FindAction("Slash", throwIfNotFound: true);
         m_Gameplay_Dash = m_Gameplay.FindAction("Dash", throwIfNotFound: true);
         m_Gameplay_SpawnEnemy = m_Gameplay.FindAction("SpawnEnemy", throwIfNotFound: true);
+        m_Gameplay_Select = m_Gameplay.FindAction("Select", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -647,6 +690,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_Slash;
     private readonly InputAction m_Gameplay_Dash;
     private readonly InputAction m_Gameplay_SpawnEnemy;
+    private readonly InputAction m_Gameplay_Select;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -658,6 +702,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Slash => m_Wrapper.m_Gameplay_Slash;
         public InputAction @Dash => m_Wrapper.m_Gameplay_Dash;
         public InputAction @SpawnEnemy => m_Wrapper.m_Gameplay_SpawnEnemy;
+        public InputAction @Select => m_Wrapper.m_Gameplay_Select;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -688,6 +733,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @SpawnEnemy.started += instance.OnSpawnEnemy;
             @SpawnEnemy.performed += instance.OnSpawnEnemy;
             @SpawnEnemy.canceled += instance.OnSpawnEnemy;
+            @Select.started += instance.OnSelect;
+            @Select.performed += instance.OnSelect;
+            @Select.canceled += instance.OnSelect;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -713,6 +761,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @SpawnEnemy.started -= instance.OnSpawnEnemy;
             @SpawnEnemy.performed -= instance.OnSpawnEnemy;
             @SpawnEnemy.canceled -= instance.OnSpawnEnemy;
+            @Select.started -= instance.OnSelect;
+            @Select.performed -= instance.OnSelect;
+            @Select.canceled -= instance.OnSelect;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -739,5 +790,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnSlash(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
         void OnSpawnEnemy(InputAction.CallbackContext context);
+        void OnSelect(InputAction.CallbackContext context);
     }
 }

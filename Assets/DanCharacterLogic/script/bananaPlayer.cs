@@ -287,4 +287,9 @@ public class bananaPlayer : MonoBehaviour
         // Ensure the player's velocity is reset to prevent unwanted movement
         rb.velocity = Vector3.zero;
     }
+
+     void Die()
+    {
+        gameController.instance.PlayerDied(gameObject);
+    }
 }

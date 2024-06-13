@@ -9,6 +9,11 @@ TagManager:
   - Spawn2
   - Spawn3
   - Spawn4
+  - SpawnPoint1
+  - SpawnPoint4
+  - SpawnPoint2
+  - SpawnPoint3
+  - Enemy
   layers:
   - Default
   - TransparentFX

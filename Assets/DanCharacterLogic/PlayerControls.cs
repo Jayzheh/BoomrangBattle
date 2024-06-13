@@ -82,7 +82,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Spawn"",
+                    ""name"": ""SpawnEnemy"",
                     ""type"": ""Button"",
                     ""id"": ""d0a7e189-b7aa-4457-81b7-f8d502ce350b"",
                     ""expectedControlType"": ""Button"",
@@ -528,7 +528,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Spawn"",
+                    ""action"": ""SpawnEnemy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -539,7 +539,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Spawn"",
+                    ""action"": ""SpawnEnemy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -550,7 +550,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Spawn"",
+                    ""action"": ""SpawnEnemy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -561,7 +561,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Spawn"",
+                    ""action"": ""SpawnEnemy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -578,7 +578,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Gameplay_BoomerangThrow = m_Gameplay.FindAction("BoomerangThrow", throwIfNotFound: true);
         m_Gameplay_Slash = m_Gameplay.FindAction("Slash", throwIfNotFound: true);
         m_Gameplay_Dash = m_Gameplay.FindAction("Dash", throwIfNotFound: true);
-        m_Gameplay_Spawn = m_Gameplay.FindAction("Spawn", throwIfNotFound: true);
+        m_Gameplay_SpawnEnemy = m_Gameplay.FindAction("SpawnEnemy", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -646,7 +646,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_BoomerangThrow;
     private readonly InputAction m_Gameplay_Slash;
     private readonly InputAction m_Gameplay_Dash;
-    private readonly InputAction m_Gameplay_Spawn;
+    private readonly InputAction m_Gameplay_SpawnEnemy;
     public struct GameplayActions
     {
         private @PlayerControls m_Wrapper;
@@ -657,7 +657,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @BoomerangThrow => m_Wrapper.m_Gameplay_BoomerangThrow;
         public InputAction @Slash => m_Wrapper.m_Gameplay_Slash;
         public InputAction @Dash => m_Wrapper.m_Gameplay_Dash;
-        public InputAction @Spawn => m_Wrapper.m_Gameplay_Spawn;
+        public InputAction @SpawnEnemy => m_Wrapper.m_Gameplay_SpawnEnemy;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -685,9 +685,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Dash.started += instance.OnDash;
             @Dash.performed += instance.OnDash;
             @Dash.canceled += instance.OnDash;
-            @Spawn.started += instance.OnSpawn;
-            @Spawn.performed += instance.OnSpawn;
-            @Spawn.canceled += instance.OnSpawn;
+            @SpawnEnemy.started += instance.OnSpawnEnemy;
+            @SpawnEnemy.performed += instance.OnSpawnEnemy;
+            @SpawnEnemy.canceled += instance.OnSpawnEnemy;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -710,9 +710,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Dash.started -= instance.OnDash;
             @Dash.performed -= instance.OnDash;
             @Dash.canceled -= instance.OnDash;
-            @Spawn.started -= instance.OnSpawn;
-            @Spawn.performed -= instance.OnSpawn;
-            @Spawn.canceled -= instance.OnSpawn;
+            @SpawnEnemy.started -= instance.OnSpawnEnemy;
+            @SpawnEnemy.performed -= instance.OnSpawnEnemy;
+            @SpawnEnemy.canceled -= instance.OnSpawnEnemy;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -738,6 +738,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnBoomerangThrow(InputAction.CallbackContext context);
         void OnSlash(InputAction.CallbackContext context);
         void OnDash(InputAction.CallbackContext context);
-        void OnSpawn(InputAction.CallbackContext context);
+        void OnSpawnEnemy(InputAction.CallbackContext context);
     }
 }

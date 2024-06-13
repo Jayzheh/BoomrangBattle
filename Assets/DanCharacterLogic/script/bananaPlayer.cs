@@ -13,16 +13,15 @@ public class bananaPlayer : MonoBehaviour
     public float dashSpeedBoost = 10f;
     public float dashDuration = 0.5f;
     private float originalMovementSpeed;
-    private Rigidbody rb;
     private Animator animator;
-    private CapsuleCollider capsuleCollider;
+    private Rigidbody rb; // Rigidbody component reference
 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float growthDuration = 2f;
     [SerializeField] private float raycastDistance = 10f;
     [SerializeField] private Transform laserOrigin;
-    [SerializeField] private LineRenderer lineRenderer;
-
+    [SerializeField] private ParticleSystem beamParticleSystem;
+    [SerializeField] private LayerMask enemyLayer; // Layer for the enemy
 
     Coroutine scaleCoroutine;
     Coroutine emitRaycastCoroutine;
@@ -66,40 +65,26 @@ public class bananaPlayer : MonoBehaviour
         };
 
         animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>(); // Get Rigidbody component from the same GameObject
+        rb.freezeRotation = true; // Freeze rotation to prevent unwanted physics behavior
+        rb.useGravity = false; // Disable gravity for now, as we handle it manually
     }
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
-        rb.useGravity = true;
-
-        capsuleCollider = GetComponent<CapsuleCollider>();
-
-        // Set up the LineRenderer
-        lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
-        lineRenderer.startColor = Color.red;
-        lineRenderer.endColor = Color.red;
-
-        capsuleCollider.center = new Vector3(0f, capsuleCollider.height / 2f, 0f);
         originalMovementSpeed = movementSpeed;
         Debug.Log("Start: Initialization complete");
     }
 
     void OnEnable()
     {
-        if (controls != null)
-            controls.Gameplay.Enable();
+        controls.Gameplay.Enable();
         Debug.Log("OnEnable: Controls enabled");
     }
 
     void OnDisable()
     {
-        if (controls != null)
-            controls.Gameplay.Disable();
+        controls.Gameplay.Disable();
         Debug.Log("OnDisable: Controls disabled");
     }
 
@@ -107,7 +92,6 @@ public class bananaPlayer : MonoBehaviour
     {
         Move();
         ApplyGravity();
-        AdjustColliderHeight();
         Debug.Log("FixedUpdate: Grounded: " + IsGrounded());
         Debug.Log("FixedUpdate: Position: " + transform.position);
     }
@@ -115,7 +99,7 @@ public class bananaPlayer : MonoBehaviour
     void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, 0f, moveInput.y) * movementSpeed * growthFactor * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + transform.TransformDirection(movement));
+        rb.MovePosition(transform.position + transform.TransformDirection(movement)); // Use Rigidbody.MovePosition for physics-based movement
 
         float moveSpeed = moveInput.magnitude;
         animator.SetFloat("Speed", moveSpeed);
@@ -168,9 +152,8 @@ public class bananaPlayer : MonoBehaviour
         float elapsedTime = 0f;
         Debug.Log("EmitRaycast: Started raycasting for " + duration + " seconds");
 
-        // Enable LineRenderer
-        lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, laserOrigin.position);
+        // Play Particle System
+        beamParticleSystem.Play();
 
         while (elapsedTime < duration)
         {
@@ -179,43 +162,38 @@ public class bananaPlayer : MonoBehaviour
             Vector3 rayDirection = laserOrigin.forward;
 
             // Perform raycast
-            if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance))
+            if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance, enemyLayer))
             {
-                lineRenderer.SetPosition(1, hit.point);
+                // Move Particle System to hit point
+                beamParticleSystem.transform.position = hit.point;
 
-                if (hit.collider.CompareTag("Player"))
+                if (hit.collider.CompareTag("Enemy"))
                 {
-                    Debug.Log("EmitRaycast: Player hit! It's a kill!");
-                    Destroy(hit.collider.gameObject); // Adjust this line as needed
+                    Debug.Log("EmitRaycast: Enemy hit! It's a kill!");
+                    Destroy(hit.collider.gameObject); // Destroy the enemy
                 }
             }
             else
             {
-                // If raycast doesn't hit anything, draw line to max distance
-                lineRenderer.SetPosition(1, rayOrigin + rayDirection * raycastDistance);
+                // Move Particle System to max distance
+                beamParticleSystem.transform.position = rayOrigin + rayDirection * raycastDistance;
             }
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        // Disable LineRenderer when raycasting ends
-        lineRenderer.enabled = false;
+        // Stop Particle System when raycasting ends
+        beamParticleSystem.Stop();
         Debug.Log("EmitRaycast: Raycasting ended after " + duration + " seconds");
     }
-
 
     void ApplyGravity()
     {
         if (!IsGrounded())
         {
-            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration);
+            rb.AddForce(Vector3.down * 10f, ForceMode.Acceleration); // Use Rigidbody.AddForce for gravity
             Debug.Log("ApplyGravity: Applying gravity");
-        }
-        else
-        {
-            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-            Debug.Log("ApplyGravity: Grounded, resetting vertical velocity");
         }
     }
 
@@ -223,15 +201,9 @@ public class bananaPlayer : MonoBehaviour
     {
         RaycastHit hit;
         Vector3 raycastOrigin = transform.position + Vector3.up * 0.1f;
-        bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, capsuleCollider.height / 2f, groundLayer);
+        bool grounded = Physics.Raycast(raycastOrigin, Vector3.down, out hit, 0.2f, groundLayer);
         Debug.Log("IsGrounded: " + grounded);
         return grounded;
-    }
-
-    void AdjustColliderHeight()
-    {
-        capsuleCollider.height = 2.02f * growthFactor;
-        Debug.Log("AdjustColliderHeight: Adjusted height to " + capsuleCollider.height);
     }
 
     void ResetScaleCoroutine()
@@ -273,17 +245,41 @@ public class bananaPlayer : MonoBehaviour
 
     IEnumerator DashEffect()
     {
-        // Calculate the destination position 2 meters forward
-        Vector3 destination = transform.position + transform.forward * 2f;
+        float elapsedTime = 0f;
+        float dashDistance = 2f; // Distance to dash
 
-        // Move the player to the destination position
+        // Calculate the destination position
+        Vector3 destination = transform.position + transform.forward * dashDistance;
+
+        // Move the player to the destination position with physics
+        while (elapsedTime < dashDuration)
+        {
+            // Calculate the distance to move this frame: speed * deltaTime
+            float step = dashSpeedBoost * Time.deltaTime;
+
+            // Move towards the destination
+            rb.MovePosition(Vector3.MoveTowards(transform.position, destination, step));
+
+            // Increment the elapsed time
+            elapsedTime += Time.deltaTime;
+
+            // Check if we've reached the destination early
+            if (Vector3.Distance(transform.position, destination) < 0.1f)
+                break;
+
+            yield return null;
+        }
+
+        // Ensure the player's position is exactly at the destination
         rb.MovePosition(destination);
 
-        // Wait for a short duration
-        yield return new WaitForSeconds(dashDuration); // Adjust this duration as needed
+        // Wait for a short duration at the destination
+        yield return new WaitForSeconds(0.1f); // Adjust this duration as needed
 
-        // Ensure the player's velocity is reset to prevent unwanted movement
-        rb.velocity = Vector3.zero;
+        // Reset any dash-related state or effects here
+        // For example, you might reset velocity or cooldowns
+
+        Debug.Log("DashEffect: Dashing completed");
     }
 
     void Die()

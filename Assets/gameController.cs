@@ -13,7 +13,12 @@ public class gameController : MonoBehaviour
     public int maxPlayers = 4;
     public int pointsToWin = 8;
 
-    private List<Transform> spawnPoints = new List<Transform>(); // List of spawn points
+    // Specify the plane dimensions and center position
+    private float planeWidth = 5f;
+    private float planeLength = 5f;
+    private Vector3 planeCenter = new Vector3(0f, -0.46f, 0f);
+
+    private List<Vector3> spawnPoints = new List<Vector3>(); // List of spawn points
     private List<GameObject> players = new List<GameObject>(); // List of active players
     private int[] playerScores; // Array to track player scores
     private bool spawnEnemyPressed = false;
@@ -39,15 +44,25 @@ public class gameController : MonoBehaviour
     void Start()
     {
         Debug.Log("Start called");
-        // Initialize spawn points (you need to set this up in your scene)
-        foreach (Transform child in transform)
-        {
-            spawnPoints.Add(child);
-            Debug.Log("Spawn point added: " + child.name);
-        }
-
+        GenerateSpawnPoints();
         StartGame();
         StartCoroutine(AutoSpawnEnemy());
+    }
+
+    void GenerateSpawnPoints()
+    {
+        Debug.Log("GenerateSpawnPoints called");
+        spawnPoints.Clear();
+
+        // Generate random spawn points within the specified plane
+        for (int i = 0; i < maxPlayers; i++)
+        {
+            float randomX = Random.Range(-planeWidth / 2f, planeWidth / 2f);
+            float randomZ = Random.Range(-planeLength / 2f, planeLength / 2f);
+            Vector3 spawnPoint = planeCenter + new Vector3(randomX, 0f, randomZ);
+            spawnPoints.Add(spawnPoint);
+            Debug.Log("Spawn point added: " + spawnPoint);
+        }
     }
 
     void StartGame()
@@ -69,9 +84,9 @@ public class gameController : MonoBehaviour
         players.Clear();
         Debug.Log("Players list cleared");
 
-        for (int i = 0; i < maxPlayers; i++)
+        for (int i = 0; i < maxPlayers && i < spawnPoints.Count; i++) // Ensure spawn points count is considered
         {
-            Vector3 spawnPosition = spawnPoints[i].position;
+            Vector3 spawnPosition = spawnPoints[i];
             GameObject playerObj = Instantiate(i == 0 ? playerPrefab : botPrefab, spawnPosition, Quaternion.identity);
             players.Add(playerObj);
             Debug.Log("Player added: " + playerObj.name + " at position " + spawnPosition);
@@ -144,10 +159,17 @@ public class gameController : MonoBehaviour
     void RespawnBot()
     {
         Debug.Log("RespawnBot called");
-        Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)].position;
-        GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
-        players.Add(botObj);
-        Debug.Log("Bot respawned: " + botObj.name + " at position " + spawnPosition);
+        if (spawnPoints.Count > 0)
+        {
+            Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
+            players.Add(botObj);
+            Debug.Log("Bot respawned: " + botObj.name + " at position " + spawnPosition);
+        }
+        else
+        {
+            Debug.LogError("No spawn points available for respawning bot!");
+        }
     }
 
     public void SpawnEnemy(InputAction.CallbackContext context)
@@ -156,10 +178,17 @@ public class gameController : MonoBehaviour
         if (context.performed && players.Count < maxPlayers)
         {
             spawnEnemyPressed = true;
-            Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)].position;
-            GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
-            players.Add(botObj);
-            Debug.Log("Enemy spawned: " + botObj.name + " at position " + spawnPosition);
+            if (spawnPoints.Count > 0)
+            {
+                Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)];
+                GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
+                players.Add(botObj);
+                Debug.Log("Enemy spawned: " + botObj.name + " at position " + spawnPosition);
+            }
+            else
+            {
+                Debug.LogError("No spawn points available for spawning enemy!");
+            }
         }
     }
 
@@ -170,10 +199,17 @@ public class gameController : MonoBehaviour
 
         if (!spawnEnemyPressed && players.Count < maxPlayers)
         {
-            Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)].position;
-            GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
-            players.Add(botObj);
-            Debug.Log("Auto spawned enemy: " + botObj.name + " at position " + spawnPosition);
+            if (spawnPoints.Count > 0)
+            {
+                Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)];
+                GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
+                players.Add(botObj);
+                Debug.Log("Auto spawned enemy: " + botObj.name + " at position " + spawnPosition);
+            }
+            else
+            {
+                Debug.LogError("No spawn points available for auto-spawning enemy!");
+            }
         }
     }
 }

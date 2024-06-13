@@ -20,6 +20,9 @@ public class bananaPlayer : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float growthDuration = 2f;
     [SerializeField] private float raycastDistance = 10f;
+    [SerializeField] private Transform laserOrigin;
+    [SerializeField] private LineRenderer lineRenderer;
+
 
     Coroutine scaleCoroutine;
     Coroutine emitRaycastCoroutine;
@@ -74,6 +77,14 @@ public class bananaPlayer : MonoBehaviour
 
         animator = GetComponent<Animator>();
         capsuleCollider = GetComponent<CapsuleCollider>();
+
+        // Set up the LineRenderer
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.startWidth = 0.1f;
+        lineRenderer.endWidth = 0.1f;
+        lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+        lineRenderer.startColor = Color.red;
+        lineRenderer.endColor = Color.red;
 
         capsuleCollider.center = new Vector3(0f, capsuleCollider.height / 2f, 0f);
         originalMovementSpeed = movementSpeed;
@@ -155,32 +166,46 @@ public class bananaPlayer : MonoBehaviour
 
     IEnumerator EmitRaycast()
     {
-        float duration = 2f;
+        float duration = 1f;
         float elapsedTime = 0f;
-        Debug.Log("EmitRaycast: Started raycasting for 5 seconds");
+        Debug.Log("EmitRaycast: Started raycasting for " + duration + " seconds");
+
+        // Enable LineRenderer
+        lineRenderer.enabled = true;
+        lineRenderer.SetPosition(0, laserOrigin.position);
 
         while (elapsedTime < duration)
         {
             RaycastHit hit;
-            Vector3 rayOrigin = transform.position;
-            Vector3 rayDirection = transform.forward * raycastDistance;
+            Vector3 rayOrigin = laserOrigin.position;
+            Vector3 rayDirection = laserOrigin.forward;
 
-            Debug.DrawRay(rayOrigin, rayDirection, Color.red);
-
-            if (Physics.Raycast(rayOrigin, transform.forward, out hit, raycastDistance))
+            // Perform raycast
+            if (Physics.Raycast(rayOrigin, rayDirection, out hit, raycastDistance))
             {
+                lineRenderer.SetPosition(1, hit.point);
+
                 if (hit.collider.CompareTag("Player"))
                 {
                     Debug.Log("EmitRaycast: Player hit! It's a kill!");
+                    Destroy(hit.collider.gameObject); // Adjust this line as needed
                 }
+            }
+            else
+            {
+                // If raycast doesn't hit anything, draw line to max distance
+                lineRenderer.SetPosition(1, rayOrigin + rayDirection * raycastDistance);
             }
 
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        Debug.Log("EmitRaycast: Raycasting ended after 5 seconds");
+        // Disable LineRenderer when raycasting ends
+        lineRenderer.enabled = false;
+        Debug.Log("EmitRaycast: Raycasting ended after " + duration + " seconds");
     }
+
 
     void ApplyGravity()
     {

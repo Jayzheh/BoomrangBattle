@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Menu_scene_boomrang_battle.unity
     guid: 9400d19d7cb5f4f6088040586a0b7e3f
   - enabled: 1
+    path: Assets/map_added.unity
+    guid: 1465c8013b19246999530118f97fc226
+  - enabled: 0
     path: Assets/FridayBoomBattle.unity
     guid: 79cd650768e244d128f4e126e15a8179
   m_configObjects:

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class enemy : MonoBehaviour
 {
-    public float movementSpeed = 5f;
+    public float movementSpeed = 1f; // Reduced movement speed
     public float attackRange = 2f;
     public float attackCooldown = 1.5f;
     private float attackCooldownTimer;
@@ -16,10 +16,12 @@ public class enemy : MonoBehaviour
 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private float minDistanceToOtherEnemies = 5f; // Increased minimum distance to maintain between enemies
+    [SerializeField] private float minDistanceToOtherEnemies = 3f; // Adjusted minimum distance
     [SerializeField] private float separationWeight = 5f; // Strength of the separation behavior
+    [SerializeField] private float redirectCooldown = 3f; // Cooldown for redirecting away from nearby enemies
 
     private Rigidbody rb;
+    private float lastRedirectTime;
 
     void Awake()
     {
@@ -34,6 +36,8 @@ public class enemy : MonoBehaviour
     void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        // Spawn at a predefined spawn point
+        SpawnAtRandomSpawnPoint();
     }
 
     void FixedUpdate()
@@ -200,25 +204,51 @@ public class enemy : MonoBehaviour
 
     void AvoidOtherEnemies()
     {
+        // Check if enough time has passed since last redirect
+        if (Time.time - lastRedirectTime < redirectCooldown)
+        {
+            return; // Exit early if redirect cooldown is not elapsed
+        }
+
         // Find all enemy objects in the scene
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-        foreach (GameObject enemy in enemies)
+        foreach (GameObject otherEnemy in enemies)
         {
-            if (enemy != gameObject) // Avoid checking against self
+            if (otherEnemy != gameObject) // Avoid checking against self
             {
-                float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
+                float distanceToEnemy = Vector3.Distance(transform.position, otherEnemy.transform.position);
 
                 if (distanceToEnemy < minDistanceToOtherEnemies)
                 {
                     // Calculate the direction away from the other enemy
-                    Vector3 directionAway = (transform.position - enemy.transform.position).normalized;
+                    Vector3 directionAway = (transform.position - otherEnemy.transform.position).normalized;
                     Vector3 separationForce = directionAway * separationWeight / distanceToEnemy;
 
                     // Apply the separation force
                     rb.AddForce(separationForce, ForceMode.Acceleration);
+
+                    // Update the last redirect time
+                    lastRedirectTime = Time.time;
                 }
             }
+        }
+    }
+
+    void SpawnAtRandomSpawnPoint()
+    {
+        // Get all spawn points by their tags
+        GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
+
+        if (spawnPoints.Length > 0)
+        {
+            // Select a random spawn point
+            GameObject randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            transform.position = randomSpawnPoint.transform.position;
+        }
+        else
+        {
+            Debug.LogError("No spawn points found with tag 'SpawnPoint'");
         }
     }
 }

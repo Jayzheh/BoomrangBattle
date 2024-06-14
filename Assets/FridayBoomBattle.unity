@@ -218,7 +218,7 @@ GameObject:
   - component: {fileID: 219175804}
   m_Layer: 0
   m_Name: SpawnPoint1
-  m_TagString: SpawnPoint1
+  m_TagString: SpawnPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -268,8 +268,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0174e1d09f15c4893a837dbdd6ae6996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 8774082086557742811, guid: 3748399926e794de5b11cd495c1e280b, type: 3}
-  botPrefab: {fileID: 5842499942459742201, guid: b754ad7a7a11e4cca9162751d5aa3b3f, type: 3}
+  playerPrefab: {fileID: 2385226358115467689, guid: 6e934fb725035495da98e516503828e9, type: 3}
+  botPrefab: {fileID: 6160721612231062098, guid: 6ac99710da9f24abcbe2609c136d5664, type: 3}
   maxPlayers: 4
   pointsToWin: 8
 --- !u!4 &594759778
@@ -330,6 +330,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1005186524}
   - component: {fileID: 1005186525}
+  - component: {fileID: 1005186526}
   m_Layer: 0
   m_Name: PlayerManager
   m_TagString: Untagged
@@ -366,11 +367,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxPlayers: 4
   playerPrefabs:
-  - {fileID: 5842499942459742201, guid: b754ad7a7a11e4cca9162751d5aa3b3f, type: 3}
+  - {fileID: 2385226358115467689, guid: 6e934fb725035495da98e516503828e9, type: 3}
   spawnPoints:
   - {fileID: 219175804}
   - {fileID: 1251802568}
   - {fileID: 1361199005}
+--- !u!114 &1005186526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1005186522}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 8a40dc53479da41ed9068a86c28545fc, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Gameplay
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &1251802567
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,7 +413,7 @@ GameObject:
   - component: {fileID: 1251802568}
   m_Layer: 0
   m_Name: SpawnPoint2
-  m_TagString: SpawnPoint2
+  m_TagString: SpawnPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -444,7 +475,7 @@ GameObject:
   - component: {fileID: 1361199005}
   m_Layer: 0
   m_Name: SpawnPoint3
-  m_TagString: SpawnPoint3
+  m_TagString: SpawnPoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -496,7 +527,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 10, y: 2, z: 10}
-  m_Center: {x: 0, y: -0.87, z: 0}
+  m_Center: {x: 0, y: -0.88, z: 0}
 --- !u!64 &1397873035
 MeshCollider:
   m_ObjectHideFlags: 0

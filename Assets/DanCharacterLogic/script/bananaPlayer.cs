@@ -32,13 +32,13 @@ public class bananaPlayer : MonoBehaviour
 
     // Parameters for animator
     float speed;
-    bool IsMoving;
-    bool IsRunning;
-    float Horizontal;
-    float Vertical;
-    bool BoomerangThrow;
-    bool Slash;
-    bool Throwing;
+    bool isMoving;
+    bool isRunning;
+    float horizontal;
+    float vertical;
+    bool boomerangThrow;
+    bool slash;
+    bool throwing;
 
     void Awake()
     {
@@ -101,7 +101,6 @@ public class bananaPlayer : MonoBehaviour
         if (controls == null)
         {
             controls = new PlayerControls();
-            // Reassign event callbacks here if needed
         }
 
         controls.Gameplay.Enable();
@@ -136,16 +135,16 @@ public class bananaPlayer : MonoBehaviour
 
         float moveSpeed = moveInput.magnitude;
         speed = moveSpeed;
-        IsMoving = moveSpeed > 0;
-        IsRunning = moveSpeed > 0.5f;
-        Horizontal = moveInput.x;
-        Vertical = moveInput.y;
+        isMoving = moveSpeed > 0;
+        isRunning = moveSpeed > 0.5f;
+        horizontal = moveInput.x;
+        vertical = moveInput.y;
 
         animator.SetFloat("Speed", speed);
-        animator.SetBool("IsMoving", IsMoving);
-        animator.SetBool("IsRunning", IsRunning);
-        animator.SetFloat("Horizontal", Horizontal);
-        animator.SetFloat("Vertical", Vertical);
+        animator.SetBool("IsMoving", isMoving);
+        animator.SetBool("IsRunning", isRunning);
+        animator.SetFloat("Horizontal", horizontal);
+        animator.SetFloat("Vertical", vertical);
 
         Debug.Log("Move: Moving with speed " + moveSpeed);
     }
@@ -169,6 +168,7 @@ public class bananaPlayer : MonoBehaviour
             Debug.Log("Grow: Cannot grow yet. Cooldown remaining: " + growthCooldown.ToString("F1") + " seconds");
         }
     }
+
     void PerformSlash()
     {
         if (slashCollider != null)
@@ -176,6 +176,7 @@ public class bananaPlayer : MonoBehaviour
             // Set trigger in animator
             animator.SetTrigger("Slash");
             Debug.Log("Slash: Performing action");
+            StartCoroutine(EnableSlashCollider());
         }
         else
         {
@@ -189,7 +190,6 @@ public class bananaPlayer : MonoBehaviour
         yield return new WaitForSeconds(0.1f); // Enable for a short duration
         slashCollider.enabled = false;
     }
-
 
     void OnTriggerEnter(Collider other)
     {
@@ -212,14 +212,12 @@ public class bananaPlayer : MonoBehaviour
             Debug.LogWarning("BoomerangThrow: Animator is null!");
         }
 
-        // Handle detection using raycast or other logic (as previously implemented)
         if (emitRaycastCoroutine != null)
         {
             StopCoroutine(emitRaycastCoroutine);
         }
         emitRaycastCoroutine = StartCoroutine(EmitRaycast());
     }
-
 
     void PerformDash()
     {
@@ -238,17 +236,13 @@ public class bananaPlayer : MonoBehaviour
 
     IEnumerator DashEffect()
     {
-        // Use the current movement direction if there's input, otherwise use forward direction
         Vector3 dashDirection = moveInput.normalized;
         if (dashDirection == Vector3.zero)
         {
             dashDirection = transform.forward;
         }
 
-        // Calculate target position
         Vector3 targetPosition = transform.position + dashDirection * dashDistance;
-
-        // Perform the dash over the short duration
         float elapsedTime = 0f;
         Vector3 startPosition = transform.position;
 
@@ -262,7 +256,6 @@ public class bananaPlayer : MonoBehaviour
         rb.MovePosition(targetPosition);
         Debug.Log("DashEffect: Dashing completed");
     }
-
 
     IEnumerator EmitRaycast()
     {

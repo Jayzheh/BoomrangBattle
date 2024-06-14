@@ -65,6 +65,7 @@ public class gameController : MonoBehaviour
         }
     }
 
+
     void StartGame()
     {
         Debug.Log("StartGame called");
@@ -178,12 +179,27 @@ public class gameController : MonoBehaviour
         if (context.performed && players.Count < maxPlayers)
         {
             spawnEnemyPressed = true;
+
             if (spawnPoints.Count > 0)
             {
-                Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Count)];
-                GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
-                players.Add(botObj);
-                Debug.Log("Enemy spawned: " + botObj.name + " at position " + spawnPosition);
+                // Filter spawn points that are far enough from players
+                List<Vector3> filteredSpawnPoints = new List<Vector3>(spawnPoints);
+                foreach (GameObject player in players)
+                {
+                    filteredSpawnPoints.RemoveAll(p => Vector3.Distance(p, player.transform.position) < 2f); // Adjust distance as needed
+                }
+
+                if (filteredSpawnPoints.Count > 0)
+                {
+                    Vector3 spawnPosition = filteredSpawnPoints[Random.Range(0, filteredSpawnPoints.Count)];
+                    GameObject botObj = Instantiate(botPrefab, spawnPosition, Quaternion.identity);
+                    players.Add(botObj);
+                    Debug.Log("Enemy spawned: " + botObj.name + " at position " + spawnPosition);
+                }
+                else
+                {
+                    Debug.LogError("No suitable spawn points available for spawning enemy!");
+                }
             }
             else
             {
@@ -191,6 +207,7 @@ public class gameController : MonoBehaviour
             }
         }
     }
+
 
     IEnumerator AutoSpawnEnemy()
     {

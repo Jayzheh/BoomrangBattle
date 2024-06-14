@@ -14,11 +14,12 @@ TagManager:
   - SpawnPoint2
   - SpawnPoint3
   - Enemy
+  - SpawnPoint
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Player
+  - playerLayer
   - Water
   - UI
   - Ground
@@ -51,7 +52,7 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Player
+  - name: playerLayer
     uniqueID: 1471646263
     locked: 0
   - name: enemyLayer

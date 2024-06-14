@@ -9,12 +9,14 @@ public class bananaPlayer : MonoBehaviour
     float growthFactor = 1.0f;
     bool canGrow = true;
     float growthCooldown = 0f;
-    public float movementSpeed = 5f;
+    public float movementSpeed = 9f;
     public float dashSpeedBoost = 10f;
-    public float dashDuration = 0.5f;
+    public float dashDistance = 3f;
+    public float dashDuration = 0.1f;
     private float originalMovementSpeed;
     private Animator animator;
     private Rigidbody rb;
+    private Collider slashCollider;
 
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float growthDuration = 2f;
@@ -22,6 +24,7 @@ public class bananaPlayer : MonoBehaviour
     [SerializeField] private Transform laserOrigin;
     [SerializeField] private ParticleSystem beamParticleSystem;
     [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private GameObject boomerangPrefab;
 
     Coroutine scaleCoroutine;
     Coroutine emitRaycastCoroutine;
@@ -29,13 +32,13 @@ public class bananaPlayer : MonoBehaviour
 
     // Parameters for animator
     float speed;
-    bool IsMoving;
-    bool IsRunning;
-    float Horizontal;
-    float Vertical;
-    bool BoomerangThrow;
-    bool Slash;
-    bool Throwing;
+    bool isMoving;
+    bool isRunning;
+    float horizontal;
+    float vertical;
+    bool boomerangThrow;
+    bool slash;
+    bool throwing;
 
     void Awake()
     {
@@ -66,6 +69,13 @@ public class bananaPlayer : MonoBehaviour
             Debug.Log("BoomerangThrow: Performing action");
         };
 
+        // Get the slash collider component (assuming it's a child object)
+        slashCollider = GetComponentInChildren<Collider>();
+        if (slashCollider == null)
+        {
+            Debug.LogError("Slash collider not found!");
+        }
+
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
 
@@ -91,7 +101,6 @@ public class bananaPlayer : MonoBehaviour
         if (controls == null)
         {
             controls = new PlayerControls();
-            // Reassign event callbacks here if needed
         }
 
         controls.Gameplay.Enable();
@@ -126,16 +135,16 @@ public class bananaPlayer : MonoBehaviour
 
         float moveSpeed = moveInput.magnitude;
         speed = moveSpeed;
-        IsMoving = moveSpeed > 0;
-        IsRunning = moveSpeed > 0.5f;
-        Horizontal = moveInput.x;
-        Vertical = moveInput.y;
+        isMoving = moveSpeed > 0;
+        isRunning = moveSpeed > 0.5f;
+        horizontal = moveInput.x;
+        vertical = moveInput.y;
 
         animator.SetFloat("Speed", speed);
-        animator.SetBool("IsMoving", IsMoving);
-        animator.SetBool("IsRunning", IsRunning);
-        animator.SetFloat("Horizontal", Horizontal);
-        animator.SetFloat("Vertical", Vertical);
+        animator.SetBool("IsMoving", isMoving);
+        animator.SetBool("IsRunning", isRunning);
+        animator.SetFloat("Horizontal", horizontal);
+        animator.SetFloat("Vertical", vertical);
 
         Debug.Log("Move: Moving with speed " + moveSpeed);
     }
@@ -162,14 +171,32 @@ public class bananaPlayer : MonoBehaviour
 
     void PerformSlash()
     {
-        RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, 2f, enemyLayer);
-        foreach (RaycastHit hit in hits)
+        if (slashCollider != null)
         {
-            if (hit.collider.CompareTag("Enemy"))
-            {
-                Debug.Log("Slash: Enemy hit! It's a kill!");
-                Destroy(hit.collider.gameObject);
-            }
+            // Set trigger in animator
+            animator.SetTrigger("Slash");
+            Debug.Log("Slash: Performing action");
+            StartCoroutine(EnableSlashCollider());
+        }
+        else
+        {
+            Debug.LogWarning("Slash: Slash collider not found!");
+        }
+    }
+
+    IEnumerator EnableSlashCollider()
+    {
+        slashCollider.enabled = true;
+        yield return new WaitForSeconds(0.1f); // Enable for a short duration
+        slashCollider.enabled = false;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log("Slash: Enemy hit! It's a kill!");
+            Destroy(other.gameObject);
         }
     }
 
@@ -178,7 +205,7 @@ public class bananaPlayer : MonoBehaviour
         if (animator != null)
         {
             animator.SetTrigger("BoomerangThrow");
-            animator.SetBool("Throwing", true);
+            Debug.Log("BoomerangThrow: Performing action");
         }
         else
         {
@@ -209,24 +236,24 @@ public class bananaPlayer : MonoBehaviour
 
     IEnumerator DashEffect()
     {
+        Vector3 dashDirection = moveInput.normalized;
+        if (dashDirection == Vector3.zero)
+        {
+            dashDirection = transform.forward;
+        }
+
+        Vector3 targetPosition = transform.position + dashDirection * dashDistance;
         float elapsedTime = 0f;
-        float dashDistance = 2f;
-        Vector3 destination = transform.position + Vector3.forward * dashDistance;
+        Vector3 startPosition = transform.position;
 
         while (elapsedTime < dashDuration)
         {
-            float step = dashSpeedBoost * Time.deltaTime;
-            rb.MovePosition(Vector3.MoveTowards(transform.position, destination, step));
+            rb.MovePosition(Vector3.Lerp(startPosition, targetPosition, elapsedTime / dashDuration));
             elapsedTime += Time.deltaTime;
-
-            if (Vector3.Distance(transform.position, destination) < 0.1f)
-                break;
-
             yield return null;
         }
 
-        rb.MovePosition(destination);
-        yield return new WaitForSeconds(0.1f);
+        rb.MovePosition(targetPosition);
         Debug.Log("DashEffect: Dashing completed");
     }
 
